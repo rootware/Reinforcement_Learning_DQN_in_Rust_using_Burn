@@ -1,31 +1,31 @@
-use burn::backend::Wgpu;
+use burn::backend::{Autodiff, Wgpu};
 use burn::config::{self, Config};
 use burn::module::Module;
-use burn::nn::loss::Reduction;
+use burn::nn::loss::{CrossEntropyLoss, Reduction};
 use burn::optim::{Adam, AdamConfig, GradientsParams};
 use burn::tensor::Tensor;
-use burn::train::ValidStep;
 use environment::Environment;
 use model::Model;
 
 
 
 
-use crate::model::ModelConfig;
 use crate::replay_buffer::ReplayBuffer;
-use crate::training::TrainingConfig;
 use crate::{environment, model}; // For experience replay
 type MyBackend = Wgpu<f32, i32>;
+type MyAutodiffBackend = Autodiff<MyBackend>;
+
 // Define a simple neural network for Q-function approximation
 pub struct DQN{
     pub env : Environment,
-    pub nn_model : Model<MyBackend>,
+    pub nn_model : Model<MyAutodiffBackend>,
     pub buffer : ReplayBuffer,
     pub gamma : f64,
+    pub optimizer: AdamConfig,
 }
 
 impl DQN {
-    pub fn new(model_arg: Model<MyBackend>, buffer: ReplayBuffer ) -> Self {
+    pub fn new(model_arg: Model<MyAutodiffBackend>, buffer: ReplayBuffer ) -> Self {
         
         DQN {
             env: Environment::new(),
@@ -36,9 +36,13 @@ impl DQN {
         }
     }
 
-    pub fn forward(&self, x: Tensor<MyBackend, 2>) -> Tensor<MyBackend, 2> {
+    pub fn forward(&self, x: Tensor<MyAutodiffBackend, 2>) -> Tensor<MyAutodiffBackend, 2> {
         self.nn_model.forward(x)
     }
+
+
+
+    /* 
 
     pub fn optimize(&mut self, batch_size: usize) {
         let optimizer: burn::optim::adaptor::OptimizerAdaptor<Adam<_>, _, _> = AdamConfig::new().with_epsilon(0.1).init();
@@ -51,7 +55,7 @@ impl DQN {
             let tensor_state = Tensor::from(mem.current_state);
             let tensor_next_state = Tensor::from(mem.next_state);
             let done = mem.done;
-            let reward = Tensor::from([mem.reward]);
+            let reward = Tensor::<MyAutodiffBackend,1>::from([mem.reward]);
             let action = Tensor::from([mem.action]);
 
             let next_q_values = self.forward(tensor_next_state);
@@ -85,15 +89,15 @@ impl DQN {
             let config_model = self.nn_model;
             let config_optimizer = AdamConfig::new();
            
-            let test_input = Tensor::<MyBackend, 2>::from( [[2.0,1.0], [2.0,3.0]]);
-            let test_target = Tensor::<MyBackend,2>::from([[2.5,1.2], [2.1,3.1]]);
+            let test_input = Tensor::<MyAutodiffBackend, 2>::from( [[2.0,1.0], [2.0,3.0]]);
+            let test_target = Tensor::<MyAutodiffBackend,2>::from([[2.5,1.2], [2.1,3.1]]);
             let loss = burn::nn::loss::MseLoss::new().forward( test_input, test_target, Reduction::Sum);
             // Gradients for the current backward pass
             let grads = loss.backward();
             // Gradients linked to each parameter of the model.
-            let grads = GradientsParams::from_grads(grads, &self.nn_model);
+            let grads2 = GradientsParams::from_grads(grads, &self.nn_model);
             // Update the model using the optimizer.
-            model = optim.step(config.lr, model, grads);
+            self.nn_model = config_optimizer.init().step(1.0e-2, self.nn_model, grads2);
 
 
 
@@ -103,5 +107,6 @@ impl DQN {
 
         }
     }
+    */
 }
 

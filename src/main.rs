@@ -3,12 +3,14 @@ pub mod dqn;
 pub mod environment;
 pub mod model;
 pub mod training;
-use burn::{backend::Wgpu, optim::Adam, tensor::Tensor};
+pub mod mytypes;
+
+use burn::{backend::{Autodiff, Wgpu}, optim::Adam, tensor::Tensor};
 use dqn::DQN;
 use replay_buffer::ReplayBuffer;
 
 
-type MyBackend = Wgpu<f32, i32>;
+
 
 
 fn main() {
@@ -17,7 +19,7 @@ fn main() {
     let output_size = 2; // Number of actions (Q-values)
 
     let device = Default::default();
-    let model = model::ModelConfig::new(2, 2,2).init::<MyBackend>(&device);
+    let model = model::ModelConfig::new(2, 2,2).init::<MyAutodiffBackend>(&device);
 
     // Initialize DQN model and optimizer
     let dqn_model = DQN::new(model,  ReplayBuffer::new(5));
@@ -31,6 +33,11 @@ fn main() {
     let epsilon = 0.1; // Epsilon for exploration-exploitation trade-off
     let episodes = 1;
     let mut total_timesteps = 0;
+
+    let data = Tensor::<MyAutodiffBackend, 2>::from( [[1.0, 2.0], [3.0, 4.0]]);
+    let output = dqn_model.forward(data);
+    println!("{}", output);
+
 
    
 }
