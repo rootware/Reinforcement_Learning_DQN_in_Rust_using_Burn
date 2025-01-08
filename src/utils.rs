@@ -1,4 +1,4 @@
 use burn::backend::{Autodiff, Wgpu};
 
-type MyBackend = Wgpu<f32, i32>;
-type MyAutodiffBackend = Autodiff<MyBackend>;
+pub type MyBackend = Wgpu<f32, i32>;
+pub type MyAutodiffBackend = Autodiff<MyBackend>;
