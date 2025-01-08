@@ -39,7 +39,7 @@ fn main() {
    // let data = Tensor::<MyAutodiffBackend, 2>::from( [[1.0, 2.0], [3.0, 4.0]]);
    let data = Tensor::<MyAutodiffBackend, 2>::from( [[1.0, 2.0], [2.0, 3.0], [3.0,4.0], [5.0, 6.0]]);
 
-   for i in 0..1000000{
+   for i in 0..100000{
     let output = dqn_model.forward(data.clone());
    // println!("{}", output.clone());
     let target = Tensor::<MyAutodiffBackend, 2>::from( [[2.0, 4.0], [4.0, 6.0], [6.0, 8.0], [10.0,12.0]]);//Tensor::<MyAutodiffBackend, 2>::from( [[1.0, 2.0], [3.0, 5.0]]);
