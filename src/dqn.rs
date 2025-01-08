@@ -21,7 +21,7 @@ pub struct DQN{
     pub nn_model : Model<MyAutodiffBackend>,
     pub buffer : ReplayBuffer,
     pub gamma : f64,
-    pub optimizer: AdamConfig,
+    pub optimizer: burn::optim::adaptor::OptimizerAdaptor<Adam<_>, _, _> ,
 }
 
 impl DQN {
@@ -32,19 +32,19 @@ impl DQN {
             nn_model: model_arg,
             buffer,
             gamma: 1.0,
-            optimizer: AdamConfig::new(),
+            optimizer: AdamConfig::new().with_epsilon(0.1).init(),
         }
     }
 
-    pub fn forward(&self, x: Tensor<MyAutodiffBackend, 2>) -> Tensor<MyAutodiffBackend, 2> {
+    pub fn forward(&self, x: Tensor<MyAutodiffBackend, 2>) -> Tensor<MyAutodiffBackend, 1> {
         self.nn_model.forward(x)
     }
 
 
 
-    /* 
+    
 
-    pub fn optimize(&mut self, batch_size: usize) {
+    pub fn update_model(&mut self, batch_size: usize) {
         let optimizer: burn::optim::adaptor::OptimizerAdaptor<Adam<_>, _, _> = AdamConfig::new().with_epsilon(0.1).init();
         // Sample a batch of experiences from the replay buffer
         let batch = self.buffer.sample(batch_size);
@@ -52,11 +52,11 @@ impl DQN {
         for mem in batch {
             // Compute target Q-value
 
-            let tensor_state = Tensor::from(mem.current_state);
-            let tensor_next_state = Tensor::from(mem.next_state);
+            let tensor_state = Tensor::<MyAutodiffBackend, 1>::from(mem.current_state);
+            let tensor_next_state = Tensor::<MyAutodiffBackend, 1>::from(mem.next_state);
             let done = mem.done;
             let reward = Tensor::<MyAutodiffBackend,1>::from([mem.reward]);
-            let action = Tensor::from([mem.action]);
+            let action = Tensor::<MyAutodiffBackend,1>::from([mem.action]);
 
             let next_q_values = self.forward(tensor_next_state);
             let target = if done {

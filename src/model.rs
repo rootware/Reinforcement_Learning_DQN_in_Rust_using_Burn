@@ -7,8 +7,8 @@ use burn::data::dataloader::batcher::Batcher;
 
 #[derive(Module, Debug)]
 pub struct Model<B: Backend> {
-  //  linear1: Linear<B>,
-  //  linear2: Linear<B>,
+    linear1: Linear<B>,
+    linear2: Linear<B>,
     linear3: Linear<B>,
     activation: Relu,
 }
@@ -25,10 +25,10 @@ impl ModelConfig {
     /// Returns the initialized model.
     pub fn init<B: Backend>(&self, device: &B::Device) -> Model<B> {
         Model {
-          //  linear1: LinearConfig::new(self.state_size, self.hidden_size).with_bias(true).init(device),
-          //  linear2: LinearConfig::new(self.hidden_size, self.hidden_size).with_bias(true).init(device),
-          //  linear3: LinearConfig::new( self.hidden_size, self.num_actions).with_bias(true).init(device),
-          linear3: LinearConfig::new( self.state_size, self.num_actions).with_bias(true).init(device),
+           // linear1: LinearConfig::new(self.state_size, self.hidden_size).with_bias(true).init(device),
+             linear1: LinearConfig::new(self.state_size, self.num_actions).with_bias(false).init(device),
+            linear2: LinearConfig::new(self.hidden_size, self.hidden_size).with_bias(false).init(device),
+            linear3: LinearConfig::new( self.hidden_size, self.num_actions).with_bias(false).init(device),
             activation: Relu::new(),
         }
     }
@@ -44,12 +44,12 @@ impl<B: Backend> Model<B> {
 
         // Create a channel at the second dimension.
         let x = images.reshape([batch_size,  length]);
-      //  let x = self.linear1.forward(x);
-      //  let x = self.activation.forward(x);
-      //  let x = self.linear2.forward(x); // [batch_size, num_classes]
-      //  let x = self.activation.forward(x) ;
-      //  let x = self.linear3.forward(x);
-        let x = self.activation.forward(x);
+       let x = self.linear1.forward(x);
+     //  let x = self.activation.forward(x);
+      // let x = self.linear2.forward(x); // [batch_size, num_classes]
+      // let x = self.activation.forward(x) ;
+     //  let x = self.linear3.forward(x);
+      // let x = self.activation.forward(x);
         x
     }
 }

@@ -19,7 +19,7 @@ fn main() {
     let output_size = 2; // Number of actions (Q-values)
 
     let device = Default::default();
-    let model = model::ModelConfig::new(2, 2,2).init::<MyAutodiffBackend>(&device);
+    let model = model::ModelConfig::new(2, 1,2).init::<MyAutodiffBackend>(&device);
 
     // Initialize DQN model and optimizer
     let mut dqn_model = DQN::new(model,  ReplayBuffer::new(5));
@@ -37,32 +37,35 @@ fn main() {
     let mut total_timesteps = 0;
 
    // let data = Tensor::<MyAutodiffBackend, 2>::from( [[1.0, 2.0], [3.0, 4.0]]);
-   let data = Tensor::<MyAutodiffBackend, 2>::from( [[1.0, 2.0], [2.0, 3.0], [3.0,4.0], [5.0, 6.0]]);
 
-   for i in 0..100000{
+    for i in 0..10000{
+    let data = Tensor::<MyAutodiffBackend, 2>::from( [[i as f64 / 10000.0, 0.0], [0.0, i as f64/10000.0]]);
+    print!("{}\t", data.clone().to_data().to_string());
     let output = dqn_model.forward(data.clone());
-   // println!("{}", output.clone());
-    let target = Tensor::<MyAutodiffBackend, 2>::from( [[2.0, 4.0], [4.0, 6.0], [6.0, 8.0], [10.0,12.0]]);//Tensor::<MyAutodiffBackend, 2>::from( [[1.0, 2.0], [3.0, 5.0]]);
+    print!("Out: {}\t", output.clone().to_data().to_string());
+    let target = Tensor::<MyAutodiffBackend, 2>::from( [[2.0 *i as f64/10000.0, 0.0], [0.0, 2.0*i as f64/10000.0]]);//Tensor::<MyAutodiffBackend, 2>::from( [[1.0, 2.0], [3.0, 5.0]]);
     
    // println!("{}", "hello");
-    let loss = (target - output).abs();//burn::nn::loss::MseLoss::new().forward( output, target, Reduction::Sum);// 
+    let loss = burn::nn::loss::MseLoss::new().forward( target, output, Reduction::Sum);// 
+    println!("Loss: {:?}", &loss.to_data().to_string());
     let grads = loss.backward();
     let grad_params = GradientsParams::from_grads(grads, &dqn_model.nn_model);
 
-  //  println!("{:?}", grad_params);
- //   println!("{:?}", dqn_model.nn_model.clone());
+   // println!("{:?}", grad_params);
+    //println!("{:?}", dqn_model.nn_model.clone());
     let opt_config = AdamConfig::new();
     let mut opt = opt_config.init();    
 
     dqn_model.nn_model = opt.step(1.0e-2, dqn_model.nn_model, grad_params);
-   }
-   // println!("{:?}", myweights.linear3.weight.to_data());
-   // println!("{:?}", myweights.linear3.bias.unwrap().to_data());
-
+    }
+    let data = Tensor::<MyAutodiffBackend,2>::from( [[9.0, 0.0], [0.0, 9.0]]);
+    println!("{:?}", myweights.linear1.weight.to_data());
+   // println!("{:?}", myweights.linear1.bias.unwrap().to_data());
+    println!("{}",data.clone());
     println!("{}", dqn_model.nn_model.forward(data));
-   // let myweights2 = dqn_model.nn_model.into_record();
-  //  println!("{:?}", myweights2.linear3.weight.to_data());
-   // println!("{:?}", myweights2.linear3.bias.unwrap().to_data());
+    let myweights2 = dqn_model.nn_model.into_record();
+    println!("{:?}", myweights2.linear1.weight.to_data());
+  //  println!("{:?}", myweights2.linear1.bias.unwrap().to_data());
 
 
 
