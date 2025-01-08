@@ -3,12 +3,12 @@ pub mod dqn;
 pub mod environment;
 pub mod model;
 pub mod training;
-pub mod mytypes;
+pub mod utils;
 
 use burn::{backend::{Autodiff, Wgpu}, optim::Adam, tensor::Tensor};
 use dqn::DQN;
 use replay_buffer::ReplayBuffer;
-
+use utils::{MyAutodiffBackend};
 
 
 

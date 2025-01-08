@@ -32,7 +32,7 @@ impl DQN {
             nn_model: model_arg,
             buffer,
             gamma: 1.0,
-
+            optimizer: AdamConfig::new().init(),
         }
     }
 
