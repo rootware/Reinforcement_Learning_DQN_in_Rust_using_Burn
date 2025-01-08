@@ -28,11 +28,15 @@ impl ReplayBuffer {
         }
     }
 
-    pub fn add(&mut self, state: State, next_state: State, action: i32, reward: f64, done: bool) {
+    pub fn add_component_wise(&mut self, state: State, next_state: State, action: i32, reward: f64, done: bool) {
         if self.buffer.len() == self.capacity {
             self.buffer.remove(0); // Remove oldest experience if full
         }
         self.buffer.push(Memory{current_state: state, next_state, action, reward, done});
+    }
+    
+    pub fn add(&mut self, mem: Memory){
+        self.buffer.push(mem);
     }
 
     pub fn sample(&self, batch_size: usize) -> Vec<Memory> {

@@ -25,8 +25,7 @@ impl ModelConfig {
     /// Returns the initialized model.
     pub fn init<B: Backend>(&self, device: &B::Device) -> Model<B> {
         Model {
-           // linear1: LinearConfig::new(self.state_size, self.hidden_size).with_bias(true).init(device),
-             linear1: LinearConfig::new(self.state_size, self.num_actions).with_bias(false).init(device),
+            linear1: LinearConfig::new(self.state_size, self.hidden_size).with_bias(true).init(device),
             linear2: LinearConfig::new(self.hidden_size, self.hidden_size).with_bias(false).init(device),
             linear3: LinearConfig::new( self.hidden_size, self.num_actions).with_bias(false).init(device),
             activation: Relu::new(),
@@ -38,23 +37,24 @@ impl<B: Backend> Model<B> {
     /// # Shapes
     ///   - Images [batch_size, height, width]
     ///   - Output [batch_size, num_classes]
-    pub fn forward(&self, images: Tensor<B, 2>) -> Tensor<B, 2> {
+    pub fn forward(&self, images: Tensor<B, 1>) -> Tensor<B, 1> {
         //let [batch_size, height, width] = images.dims();
-        let [batch_size, length ] = images.dims();
+       // let [batch_size, length ] = images.dims();
 
         // Create a channel at the second dimension.
-        let x = images.reshape([batch_size,  length]);
-       let x = self.linear1.forward(x);
-     //  let x = self.activation.forward(x);
-      // let x = self.linear2.forward(x); // [batch_size, num_classes]
-      // let x = self.activation.forward(x) ;
-     //  let x = self.linear3.forward(x);
-      // let x = self.activation.forward(x);
+        //let x = images.reshape([batch_size,  length]);
+        let x = images;
+        let x = self.linear1.forward(x);
+        let x = self.activation.forward(x);
+        let x = self.linear2.forward(x); // [batch_size, num_classes]
+        let x = self.activation.forward(x) ;
+        let x = self.linear3.forward(x);
+        let x = self.activation.forward(x);
         x
     }
 }
 
-
+/* 
 
 #[derive(Clone)]
 pub struct MnistBatcher<B: Backend> {
@@ -86,4 +86,4 @@ impl<B: Backend> Batcher<Tensor<B,1>, MnistBatch<B>> for MnistBatcher<B> {
         MnistBatch { input: myinput}
     }
 }
-/////
+ */
