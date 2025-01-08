@@ -7,3 +7,10 @@ It's very much a work in progress, especially as I learn more about Burn and bec
 Eventually after that, I'd like to implement and play around with physics informed variations of double deep Q- Networks.
 
 P.S. I recently learned the Burn project, in their github examples folder, actually offers a DQN example. Mine is a lot more coarse haha, but I hope to experiment around with mine and see if I can play around with interpretability and designing physics informed networks. Especially for usecases like my github repo `lattice_evolution`.
+
+## Specific To-Dos:
+- Implement epsilon greedy
+- Move towards epochs and proper batching of samples from replay buffer
+- Use Libtorch backend if possible
+- Test on more involved examples to see if it's successfully learning e.g. shaken lattice repo
+- Implement double deep by adding a target and policy network with soft and hard updates
