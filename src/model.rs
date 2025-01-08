@@ -7,10 +7,10 @@ use burn::data::dataloader::batcher::Batcher;
 
 #[derive(Module, Debug)]
 pub struct Model<B: Backend> {
-    linear1: Linear<B>,
-    linear2: Linear<B>,
-    linear3: Linear<B>,
-    activation: Relu,
+    pub linear1: Linear<B>,
+    pub linear2: Linear<B>,
+    pub linear3: Linear<B>,
+    pub activation: Relu,
 }
 
 #[derive(Config, Debug)]

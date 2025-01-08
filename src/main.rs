@@ -4,30 +4,38 @@ pub mod environment;
 pub mod model;
 //pub mod training;
 pub mod utils;
-
+use burn::module::{Module, ModuleMapper, Param};
+use burn::backend::autodiff::checkpoint::state;
+use burn::tensor::Tensor;
 use dqn::DQN;
 use replay_buffer::ReplayBuffer;
-use utils::{MyAutodiffBackend, MyConfig};
+use utils::*;
 
 
 
 fn main() {
-    let input_size = 4; // Example input size (e.g., state size)
-    let hidden_size = 64;
-    let output_size = 2; // Number of actions (Q-values)
+
 
     let device = Default::default();
-    let model = model::ModelConfig::new(10, 20,4).init::<MyAutodiffBackend>(&device);
+    let model = model::ModelConfig::new(STATE_SIZE, HIDDEN_SIZE, NUM_ACTIONS).init::<MyAutodiffBackend>(&device);
 
-    let myconfig = MyConfig{ gamma: 0.1, lr: 1.0e-2, epsilon: 0.8, tau: 0.1};
+    let myconfig = MyConfig{ gamma: 0.99, lr: 1.0e-1, epsilon: 0.9, tau: 0.1};
     // Initialize DQN model and optimizer
-    let mut dqn_model = DQN::new(model,  ReplayBuffer::new(5), myconfig);
-    dqn_model.train(2,2);
-    
+    let mut dqn_model = DQN::new(model,  ReplayBuffer::new(200), myconfig);
+    dqn_model.train(1000,10);
+    dqn_model.extract_policy();
 
 
 
+    /*
+    println!("{}",dqn_model.nn_model.linear1.weight.clone().to_data());
+    dqn_model.nn_model.linear1.weight = Param::from_tensor(Tensor::<MyAutodiffBackend,2>::from(dqn_model.nn_model.linear1.weight.to_data()).sub(
+      Tensor::<MyAutodiffBackend,2>::from(dqn_model.nn_model.linear1.weight.clone().to_data())
+    ) );
 
+    println!("{}",dqn_model.nn_model.linear1.weight.clone().to_data());
+
+  */
 
    
 }

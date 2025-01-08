@@ -1,7 +1,6 @@
 use rand::seq::SliceRandom; // For experience replay
 
-
-type State = [f64; 10];
+use crate::utils::*;
 #[derive(Clone)]
 pub struct Memory {
     pub current_state : State,
