@@ -1,7 +1,7 @@
 use crate::replay_buffer::Memory;
 use crate::utils::*;
 
-pub const TARGET : State = [3.0, 5.000001];
+pub const TARGET: State = [3.0, 5.000001];
 pub struct Environment {
     pub current_state: State,
     current_steps: i32,
@@ -30,29 +30,23 @@ impl Environment {
         self.action_record.push(action);
         Memory {
             current_state: prev_state,
-            // 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0],
             next_state: self.current_state,
-            //] 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0] ,
             action,
             reward: self.reward(),
             done: self.done(),
         }
     }
 
-    pub fn distance2(&self, state : &State ) -> f64 {
-        (state[0]  - TARGET[0]).powi(2) + (state[1]-TARGET[1]).powi(2) 
+    pub fn distance2(&self, state: &State) -> f64 {
+        (state[0] - TARGET[0]).powi(2) + (state[1] - TARGET[1]).powi(2)
     }
     pub fn reward(&self) -> f64 {
-       // 0.000001 - 1./self.distance2(&[0.0, 0.0]) + 1.0 / self.distance2(&self.current_state)
-       let f = self.distance2(&self.current_state)/self.distance2(&[-3.,5.]) ;
-       f64::exp((1.-f)/f )
-       
+        let f = self.distance2(&self.current_state) / self.distance2(&[-3., 5.]);
+        f64::exp((1. - f) / (0.1 + f))
     }
 
     pub fn done(&self) -> bool {
-        if self.current_steps >= self.maxsteps
-            || self.distance2(&self.current_state) <= 0.01
-        {
+        if self.current_steps >= self.maxsteps || self.distance2(&self.current_state) <= 0.01 {
             true
         } else {
             false
@@ -63,7 +57,7 @@ impl Environment {
         Environment {
             current_state: [0.0, 0.0],
             current_steps: 0,
-            maxsteps: 30,
+            maxsteps: 10,
             action_record: Vec::new(),
         }
     }

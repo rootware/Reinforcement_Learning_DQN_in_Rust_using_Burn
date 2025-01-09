@@ -1,15 +1,14 @@
 //use burn::backend::{Autodiff, Wgpu};
-// use burn_cuda::{Cuda, CudaDevice};  
+// use burn_cuda::{Cuda, CudaDevice};
 
 use burn::backend::Autodiff;
-use burn_tch::{LibTorch, LibTorchDevice};
+use burn_tch::LibTorch;
 
 //pub type MyBackend = Wgpu<f32, i32>;
 //pub type MyAutodiffBackend = Autodiff<MyBackend>;
 
 // pub type MyBackend = Cuda<f32, i32>;
 // pub type MyAutodiffBackend = Autodiff<MyBackend>;
-
 
 pub type MyBackend = LibTorch<f32>;
 pub type MyAutodiffBackend = Autodiff<MyBackend>;
@@ -28,5 +27,5 @@ pub struct MyConfig {
 }
 
 pub fn epsilon_greed(current: i32, total: i32, decay: f64) -> f64 {
-    return f64::exp(- (current/total ) as f64/decay)
+    return f64::exp(-(current / total) as f64 / decay);
 }
