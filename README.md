@@ -1,3 +1,4 @@
+# Reinforcement Learning (double deep Q-learning) in Rust using Burn API
 ## Introduction
 As you can see from my Github, I usually work in applying Reinforcement Learning to physics design problems. The codebase I usually use is owned by the JILA team, implements double deep Q-Networks and is in C++. I usually couple that to my C++ / Rust physics simulations.
 
