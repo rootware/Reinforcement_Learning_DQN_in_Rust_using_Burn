@@ -8,9 +8,16 @@ Eventually after that, I'd like to implement and play around with physics inform
 
 P.S. I recently learned the Burn project, in their github examples folder, actually offers a DQN example. Mine is a lot more coarse haha, but I hope to experiment around with mine and see if I can play around with interpretability and designing physics informed networks. Especially for usecases like my github repo `lattice_evolution`.
 
+## Tests done and Recent edits:
+- Uses Libtorch backend successfully
+- Changed to Xavier initialization
+- For some reason, Sigmoid gives better results for Q-Table than ReLu
+- While it can often find the best policy, if an entry in the Q-Table becomes zero it stays zero. Unsure why this is happening.
+- Disparity between best policy and the zero epsilon policy. Am testing by printing out Q-Tables for examples.
+
 ## Specific To-Dos:
-- Implement epsilon greedy
-- Move towards epochs and proper batching of samples from replay buffer
-- Use Libtorch backend if possible
+- Implement epsilon greedy : right now, have epsilon decreasing but it doesn't use a function and is done manually
+- ~Move towards epochs and proper batching of samples from replay buffer~
+- ~Use Libtorch backend if possible~ Using Libtorch backend
 - Test on more involved examples to see if it's successfully learning e.g. shaken lattice repo
 - Implement double deep by adding a target and policy network with soft and hard updates
