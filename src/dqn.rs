@@ -51,6 +51,11 @@ impl DQN {
                 finish = self.env.done();
                 self.replay_buffer.add(result);
             }
+            if self.env.reward() > current_reward {
+                self.action_record = self.env.action_record.clone();
+                current_reward = self.env.reward();
+            }
+            self.env.reset();
             if i % record_step == 0 {
                 print_string = self.update_model(50);
 
@@ -58,11 +63,7 @@ impl DQN {
                 self.config.epsilon -= 0.8 / (num_episodes as f64)* record_step as f64;
 
             }
-            if self.env.reward() > current_reward {
-                self.action_record = self.env.action_record.clone();
-                current_reward = self.env.reward();
-            }
-            self.env.reset();
+
         }
     }
 
