@@ -56,7 +56,7 @@ impl<B: Backend> Model<B> {
 
 
 impl<B: AutodiffBackend> Model<B> {
-    pub fn soft_update(
+    pub fn weighted_copy(
         mut a: Model<B>,
         b: &Model<B>,
         c: &Model<B>,

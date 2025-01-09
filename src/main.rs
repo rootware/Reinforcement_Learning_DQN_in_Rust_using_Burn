@@ -29,7 +29,7 @@ fn main() {
     let mut dqn_model_2 = DQN::new(model2.clone(),  ReplayBuffer::new(200), myconfig.clone());
     let mut dqn_model_3 = DQN::new(model3,  ReplayBuffer::new(200), myconfig);
 
-    Model::soft_update(dqn_model_3.nn_model, &dqn_model_1.nn_model, &dqn_model_2.nn_model, 0.5);
+    Model::weighted_copy(dqn_model_3.nn_model, &dqn_model_1.nn_model, &dqn_model_2.nn_model, 0.5);
 
     //dqn_model.train(1000,10);
    // dqn_model.extract_policy();
