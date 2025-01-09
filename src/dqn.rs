@@ -138,7 +138,7 @@ impl DQN {
         self.env.reset();
         self.config.epsilon = 0.0;
 
-        while !self.action_record.is_empty() {
+        while !self.env.done() {
             let action = self.propose_action();
             //let action = self.action_record.pop().unwrap();
             self.env.step(action);
