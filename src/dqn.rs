@@ -1,4 +1,4 @@
-use burn::{nn::loss::Reduction, optim::{Adam, AdamConfig, GradientsParams}, tensor::{Int, Tensor}};
+use burn::{optim::{AdamConfig, GradientsParams}, tensor::{Int, Tensor}};
 use environment::Environment;
 use model::Model;
 use rand::Rng;
@@ -13,7 +13,7 @@ pub struct DQN{
     pub nn_model : Model<MyAutodiffBackend>,
     pub replay_buffer : ReplayBuffer,
     pub config : MyConfig,
-    pub actionRecord : Vec<i32>,
+    pub action_record : Vec<i32>,
    // pub optimizer: burn::optim::adaptor::OptimizerAdaptor<Adam<_>, _, _> ,
 }
 
@@ -25,7 +25,7 @@ impl DQN {
             nn_model: model_arg,
             replay_buffer,
             config,
-            actionRecord : Vec::new()
+            action_record : Vec::new()
            // optimizer: AdamConfig::new().with_epsilon(0.1).init(),
         }
     }
@@ -52,7 +52,7 @@ impl DQN {
                 println!("{}\t{}\t{}", i, self.config.epsilon,print_string);
             }
             if self.env.reward() > current_reward {
-                self.actionRecord = self.env.actionRecord.clone();
+                self.action_record = self.env.action_record.clone();
                 current_reward = self.env.reward();
             }
             self.env.reset();
@@ -126,9 +126,9 @@ impl DQN {
         self.env.reset();
         self.config.epsilon = 0.0;
 
-        while !self.actionRecord.is_empty(){
+        while !self.action_record.is_empty(){
             //let action = self.propose_action();
-            let action = self.actionRecord.pop().unwrap();
+            let action = self.action_record.pop().unwrap();
             self.env.step( action);
             println!("{}, {:?}", action, self.env.current_state.clone());
         }

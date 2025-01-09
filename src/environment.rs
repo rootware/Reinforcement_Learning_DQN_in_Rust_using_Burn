@@ -1,11 +1,11 @@
-use crate::replay_buffer::{ Memory};
+use crate::replay_buffer::Memory;
 use crate::utils::*;
 
 pub struct Environment{
     pub current_state : State,
     current_steps: i32,
     maxsteps : i32,
-    pub actionRecord: Vec<i32>,
+    pub action_record: Vec<i32>,
 }
 
 impl Environment {
@@ -26,7 +26,7 @@ impl Environment {
             self.current_state[1] -=1.0;
         }
 
-        self.actionRecord.push(action);
+        self.action_record.push(action);
         Memory{ current_state: prev_state,
             // 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0], 
             next_state:  self.current_state,
@@ -50,12 +50,12 @@ impl Environment {
     }
 
     pub fn new() -> Environment {
-        Environment{current_state : [0.0, 0.0], current_steps: 0,maxsteps: 30, actionRecord: Vec::new()}
+        Environment{current_state : [0.0, 0.0], current_steps: 0,maxsteps: 30, action_record: Vec::new()}
     }
 
     pub fn reset(&mut self) {
         self.current_state = [0.0,0.0];
         self.current_steps = 0;
-        self.actionRecord = Vec::new();
+        self.action_record = Vec::new();
     }
 }

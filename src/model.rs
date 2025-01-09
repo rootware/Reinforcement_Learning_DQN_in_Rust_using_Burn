@@ -3,7 +3,6 @@ use burn::{
         Linear, LinearConfig, Relu,
     }, prelude::*, tensor::backend::AutodiffBackend
 };
-use burn::data::dataloader::batcher::Batcher;
 
 #[derive(Module, Debug)]
 pub struct Model<B: Backend> {
