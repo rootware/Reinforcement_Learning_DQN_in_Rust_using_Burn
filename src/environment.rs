@@ -1,6 +1,7 @@
 use crate::replay_buffer::Memory;
 use crate::utils::*;
 
+pub const target : State = [24.0, 0.000001];
 pub struct Environment {
     pub current_state: State,
     current_steps: i32,
@@ -39,12 +40,12 @@ impl Environment {
     }
 
     pub fn reward(&self) -> f64 {
-        1.0 / (self.current_state[0] + self.current_state[1] - 24.000000001).abs()
+        1.0 / (self.current_state[0] + self.current_state[1] - target[0]-target[1]).abs()
     }
 
     pub fn done(&self) -> bool {
         if self.current_steps >= self.maxsteps
-            || (self.current_state[0] + self.current_state[1] - 24.000000001).abs() <= 0.01
+            || (self.current_state[0] + self.current_state[1] - target[0] - target[1]).abs() <= 0.01
         {
             true
         } else {
