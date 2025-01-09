@@ -9,6 +9,7 @@ pub const NUM_ACTIONS : usize = 4;
 pub type State = [f64; STATE_SIZE];
 
 
+#[derive(Clone, Copy)]
 pub struct MyConfig {
     pub gamma: f64,
     pub lr : f64,

@@ -1,7 +1,7 @@
 use burn::{
     nn::{
         Linear, LinearConfig, Relu,
-    }, prelude::*
+    }, prelude::*, tensor::backend::AutodiffBackend
 };
 use burn::data::dataloader::batcher::Batcher;
 
@@ -25,7 +25,7 @@ impl ModelConfig {
     /// Returns the initialized model.
     pub fn init<B: Backend>(&self, device: &B::Device) -> Model<B> {
         Model {
-            linear1: LinearConfig::new(self.state_size, self.hidden_size).with_bias(true).init(device),
+            linear1: LinearConfig::new(self.state_size, self.hidden_size).with_bias(false).init(device),
             linear2: LinearConfig::new(self.hidden_size, self.hidden_size).with_bias(false).init(device),
             linear3: LinearConfig::new( self.hidden_size, self.num_actions).with_bias(false).init(device),
             activation: Relu::new(),
@@ -54,36 +54,40 @@ impl<B: Backend> Model<B> {
     }
 }
 
-/* 
 
-#[derive(Clone)]
-pub struct MnistBatcher<B: Backend> {
-    device: B::Device,
-}
-
-impl<B: Backend> MnistBatcher<B> {
-    pub fn new(device: B::Device) -> Self {
-        Self { device }
-    }
-}
-
-
-
-#[derive(Clone, Debug)]
-pub struct MnistBatch<B: Backend> {
-    pub input: Tensor<B, 2>,
-   // pub targets: Tensor<B, 1, Int>,
-}
-
-// replace MnistItem with f64
-
-impl<B: Backend> Batcher<Tensor<B,1>, MnistBatch<B>> for MnistBatcher<B> {
-    fn batch(&self, items: Vec<Tensor<B,1>>) -> MnistBatch<B> {
+impl<B: AutodiffBackend> Model<B> {
+    pub fn soft_update(
+        mut a: Model<B>,
+        b: &Model<B>,
+        c: &Model<B>,
+        beta: f32, // e.g., 0.1
+        ) -> Model<B> {
+        // Assuming no bias in linear layers
+          println!("b: {}", b.linear1.weight.val());
+          println!("c: {}", c.linear1.weight.val());
+          println!("a before: {}", a.linear1.weight.val());
   
-        let myitems = items.iter().map( |tensor| tensor.clone().reshape([1, 2])).collect();
-        let myinput = Tensor::cat(myitems, 0).to_device(&self.device);
+          a.linear1.weight = a
+            .linear1
+            .weight
+            .map(|_| b.linear1.weight.val().mul_scalar(beta) + c.linear1.weight.val().mul_scalar(1. - beta));
+  
+          //let mut bias  = *(a.linear1.bias.as_mut().unwrap());
+          //*bias = (*bias)
+          //  .map(|_| b.linear1.bias.as_ref().unwrap().val().mul_scalar(beta) + c.linear1.bias.as_ref().unwrap().val().mul_scalar(1. - beta));
+  
+          a.linear2.weight = a
+            .linear2
+            .weight
+            .map(|_| b.linear2.weight.val().mul_scalar(beta) + c.linear2.weight.val().mul_scalar(1. - beta));
+  
+          a.linear3.weight = a
+            .linear3
+            .weight
+            .map(|_| b.linear3.weight.val().mul_scalar(beta) + c.linear3.weight.val().mul_scalar(1. - beta));
+        
+            println!("a after: {}", a.linear1.weight.val());
 
-        MnistBatch { input: myinput}
+        a
+      }
     }
-}
- */
