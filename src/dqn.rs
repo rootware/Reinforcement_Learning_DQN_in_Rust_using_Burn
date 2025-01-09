@@ -13,7 +13,8 @@ use rand::Rng;
 // Define a simple neural network for Q-function approximation
 pub struct DQN {
     pub env: Environment,
-    pub nn_model: Model<MyAutodiffBackend>,
+    pub policy_model: Model<MyAutodiffBackend>,
+    pub target_model: Model<MyAutodiffBackend>,
     pub replay_buffer: ReplayBuffer,
     pub config: MyConfig,
     pub action_record: Vec<i32>,
@@ -22,13 +23,15 @@ pub struct DQN {
 
 impl DQN {
     pub fn new(
-        model_arg: Model<MyAutodiffBackend>,
+        policy: Model<MyAutodiffBackend>,
+        target: Model<MyAutodiffBackend>,
         replay_buffer: ReplayBuffer,
         config: MyConfig,
     ) -> Self {
         DQN {
             env: Environment::new(),
-            nn_model: model_arg,
+            policy_model: policy,
+            target_model : target,
             replay_buffer,
             config,
             action_record: Vec::new(), // optimizer: AdamConfig::new().with_epsilon(0.1).init(),
@@ -36,16 +39,22 @@ impl DQN {
     }
 
     pub fn forward(&self, x: Tensor<MyAutodiffBackend, 1>) -> Tensor<MyAutodiffBackend, 1> {
-        self.nn_model.forward(x)
+        self.policy_model.forward(x)
     }
 
     pub fn train(&mut self, num_episodes: i32, num_trials: i32) {
         let mut print_string = String::new();
         let mut current_reward = 0.0;
         let record_step = 20;
+        let mut step_count = 0;
+        let target_update_period = 100;
         for i in 0..num_episodes as usize {
             let mut finish = false;
             while !finish {
+                step_count += 1;
+                if step_count % target_update_period == 0 {
+                    self.update_target();
+                }
                 let action = self.propose_action();
                 let result = self.env.step(action);
                 finish = self.env.done();
@@ -74,13 +83,17 @@ impl DQN {
         if random_float > self.config.epsilon {
             return rng.gen_range(0..NUM_ACTIONS) as i32;
         } else {
-            let q_val = self.forward(Tensor::<MyAutodiffBackend, 1>::from(self.env.current_state));
+            let q_val = self.target_model.forward(Tensor::<MyAutodiffBackend, 1>::from(self.env.current_state));
             let max: Result<Vec<i32>, _> = q_val.argmax(0).to_data().to_vec();
             let mut max2 = max.unwrap();
             max2.pop().unwrap()
         }
     }
 
+    pub fn update_target(&mut self){
+       // self.target_model = Model::copy_model(self.target_model.clone(), &self.policy_model);
+       self.target_model = Model::copy_model(self.target_model.clone(), &self.policy_model);
+    }
     pub fn update_model(&mut self, batch_size: usize) -> String {
         let mut optimizer = AdamConfig::new()
             .with_epsilon(self.config.epsilon as f32)
@@ -109,14 +122,14 @@ impl DQN {
             let q_values = self.forward(tensor_state.clone());
             let q_value = q_values.select(0, action); //q_values.select(0, action  );
 
-            // let loss = burn::nn::loss::MseLoss::new().forward( q_value, target, Reduction::Sum);//
+            // let loss = burn::policy::loss::MseLoss::new().forward( q_value, target, Reduction::Sum);//
             let loss = (q_value - target).abs(); //.require_grad();
                                                  // Gradients for the current backward pass
             let grads = loss.backward();
             // Gradients linked to each parameter of the model.
-            let grads2 = GradientsParams::from_grads(grads, &self.nn_model);
+            let grads2 = GradientsParams::from_grads(grads, &self.policy_model);
             // Update the model using the optimizer.
-            self.nn_model = optimizer.step(1.0e-2, self.nn_model.clone(), grads2);
+            self.policy_model = optimizer.step(1.0e-2, self.policy_model.clone(), grads2);
 
             loss_string = loss.to_data().to_string();
         }

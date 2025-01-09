@@ -58,20 +58,19 @@ impl<B: Backend> Model<B> {
     }
 }
 
+
 impl<B: AutodiffBackend> Model<B> {
-    pub fn weighted_copy(
+    pub fn copy_model(
         mut a: Model<B>,
-        b: &Model<B>,
-        c: &Model<B>,
-        beta: f32, // e.g., 0.1
+        b: &Model<B>
     ) -> Model<B> {
         // Assuming no bias in linear layers
-        println!("b: {}", b.linear1.weight.val());
-        println!("c: {}", c.linear1.weight.val());
-        println!("a before: {}", a.linear1.weight.val());
+      //  println!("b: {}", b.linear1.weight.val());
+      //  println!("c: {}", c.linear1.weight.val());
+       // println!("a before: {}", a.linear1.weight.val());
 
         a.linear1.weight = a.linear1.weight.map(|_| {
-            b.linear1.weight.val().mul_scalar(beta) + c.linear1.weight.val().mul_scalar(1. - beta)
+            b.linear1.weight.val()
         });
 
         //let mut bias  = *(a.linear1.bias.as_mut().unwrap());
@@ -79,15 +78,51 @@ impl<B: AutodiffBackend> Model<B> {
         //  .map(|_| b.linear1.bias.as_ref().unwrap().val().mul_scalar(beta) + c.linear1.bias.as_ref().unwrap().val().mul_scalar(1. - beta));
 
         a.linear2.weight = a.linear2.weight.map(|_| {
-            b.linear2.weight.val().mul_scalar(beta) + c.linear2.weight.val().mul_scalar(1. - beta)
+            b.linear2.weight.val()
         });
 
         a.linear3.weight = a.linear3.weight.map(|_| {
-            b.linear3.weight.val().mul_scalar(beta) + c.linear3.weight.val().mul_scalar(1. - beta)
+            b.linear3.weight.val()
         });
 
-        println!("a after: {}", a.linear1.weight.val());
+      //  println!("a after: {}", a.linear1.weight.val());
 
         a
     }
 }
+
+// impl<B: AutodiffBackend> Model<B> {
+//     pub fn weighted_copy(
+//         mut a: Model<B>,
+//         b: &Model<B>,
+//         c: &Model<B>,
+//         beta: f32, // e.g., 0.1
+//     ) -> Model<B> {
+//         // Assuming no bias in linear layers
+//         println!("b: {}", b.linear1.weight.val());
+//         println!("c: {}", c.linear1.weight.val());
+//         println!("a before: {}", a.linear1.weight.val());
+//
+//         a.linear1.weight = a.linear1.weight.map(|_| {
+//             b.linear1.weight.val().mul_scalar(beta) + c.linear1.weight.val().mul_scalar(1. - beta)
+//         });
+//
+//         //let mut bias  = *(a.linear1.bias.as_mut().unwrap());
+//         //*bias = (*bias)
+//         //  .map(|_| b.linear1.bias.as_ref().unwrap().val().mul_scalar(beta) + c.linear1.bias.as_ref().unwrap().val().mul_scalar(1. - beta));
+//
+//         a.linear2.weight = a.linear2.weight.map(|_| {
+//             b.linear2.weight.val().mul_scalar(beta) + c.linear2.weight.val().mul_scalar(1. - beta)
+//         });
+//
+//         a.linear3.weight = a.linear3.weight.map(|_| {
+//             b.linear3.weight.val().mul_scalar(beta) + c.linear3.weight.val().mul_scalar(1. - beta)
+//         });
+//
+//         println!("a after: {}", a.linear1.weight.val());
+//
+//         a
+//     }
+// }
+//     
+// */

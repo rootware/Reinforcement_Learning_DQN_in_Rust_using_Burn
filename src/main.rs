@@ -22,9 +22,9 @@ fn main() {
         tau: 0.1,
     };
     // Initialize DQN model and optimizer
-    let mut dqn_model = DQN::new(model.clone(), ReplayBuffer::new(100000), myconfig.clone());
+    let mut dqn_model = DQN::new(model.clone(), model.clone(),ReplayBuffer::new(100000), myconfig.clone());
 
-    dqn_model.train(5000, 10);
+    dqn_model.train(1000, 10);
     println!("zero epsilon policy");
     dqn_model.extract_policy_zero_epsilon();
     println!("best ever policy");
