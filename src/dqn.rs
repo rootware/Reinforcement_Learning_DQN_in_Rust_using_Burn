@@ -1,32 +1,37 @@
-use burn::{optim::{AdamConfig, GradientsParams}, tensor::{Int, Tensor}};
+use crate::replay_buffer::ReplayBuffer;
+use crate::utils::*;
+use crate::{environment, model}; // For experience replay
+use burn::optim::Optimizer;
+use burn::{
+    optim::{AdamConfig, GradientsParams},
+    tensor::{Int, Tensor},
+};
 use environment::Environment;
 use model::Model;
 use rand::Rng;
-use crate::utils::*;
-use crate::replay_buffer::ReplayBuffer;
-use crate::{environment, model}; // For experience replay
-use burn::optim::Optimizer;
 
 // Define a simple neural network for Q-function approximation
-pub struct DQN{
-    pub env : Environment,
-    pub nn_model : Model<MyAutodiffBackend>,
-    pub replay_buffer : ReplayBuffer,
-    pub config : MyConfig,
-    pub action_record : Vec<i32>,
-   // pub optimizer: burn::optim::adaptor::OptimizerAdaptor<Adam<_>, _, _> ,
+pub struct DQN {
+    pub env: Environment,
+    pub nn_model: Model<MyAutodiffBackend>,
+    pub replay_buffer: ReplayBuffer,
+    pub config: MyConfig,
+    pub action_record: Vec<i32>,
+    // pub optimizer: burn::optim::adaptor::OptimizerAdaptor<Adam<_>, _, _> ,
 }
 
 impl DQN {
-    pub fn new(model_arg: Model<MyAutodiffBackend>, replay_buffer: ReplayBuffer , config: MyConfig) -> Self {
-        
+    pub fn new(
+        model_arg: Model<MyAutodiffBackend>,
+        replay_buffer: ReplayBuffer,
+        config: MyConfig,
+    ) -> Self {
         DQN {
             env: Environment::new(),
             nn_model: model_arg,
             replay_buffer,
             config,
-            action_record : Vec::new()
-           // optimizer: AdamConfig::new().with_epsilon(0.1).init(),
+            action_record: Vec::new(), // optimizer: AdamConfig::new().with_epsilon(0.1).init(),
         }
     }
 
@@ -47,21 +52,16 @@ impl DQN {
             }
             if i % 20 == 0 {
                 print_string = self.update_model(50);
-                self.config.epsilon -=0.8/(num_episodes as f64);
+                self.config.epsilon -= 0.8 / (num_episodes as f64);
 
-                println!("{}\t{}\t{}", i, self.config.epsilon,print_string);
+                println!("{}\t{}\t{}", i, self.config.epsilon, print_string);
             }
             if self.env.reward() > current_reward {
                 self.action_record = self.env.action_record.clone();
                 current_reward = self.env.reward();
             }
             self.env.reset();
-            
-            
         }
-        
-
-
     }
 
     pub fn propose_action(&self) -> i32 {
@@ -70,18 +70,18 @@ impl DQN {
 
         if random_float > self.config.epsilon {
             return rng.gen_range(0..NUM_ACTIONS) as i32;
-        }
-        else {
-            let q_val = self.forward(Tensor::<MyAutodiffBackend,1>::from( self.env.current_state) );
+        } else {
+            let q_val = self.forward(Tensor::<MyAutodiffBackend, 1>::from(self.env.current_state));
             let max: Result<Vec<i32>, _> = q_val.argmax(0).to_data().to_vec();
             let mut max2 = max.unwrap();
             max2.pop().unwrap()
         }
-        
     }
 
     pub fn update_model(&mut self, batch_size: usize) -> String {
-       let mut optimizer = AdamConfig::new().with_epsilon(self.config.epsilon as f32).init();
+        let mut optimizer = AdamConfig::new()
+            .with_epsilon(self.config.epsilon as f32)
+            .init();
         // Sample a batch of experiences from the replay buffer
         let batch = self.replay_buffer.sample(batch_size);
         let mut loss_string = String::new();
@@ -92,22 +92,23 @@ impl DQN {
             let tensor_state = Tensor::<MyAutodiffBackend, 1>::from(mem.current_state);
             let tensor_next_state = Tensor::<MyAutodiffBackend, 1>::from(mem.next_state);
             let done = mem.done;
-            let reward = Tensor::<MyAutodiffBackend,1>::from([mem.reward]);
-            let action:Tensor<MyAutodiffBackend, 1, Int>  = Tensor::<MyAutodiffBackend,1, Int>::from([mem.action]);
+            let reward = Tensor::<MyAutodiffBackend, 1>::from([mem.reward]);
+            let action: Tensor<MyAutodiffBackend, 1, Int> =
+                Tensor::<MyAutodiffBackend, 1, Int>::from([mem.action]);
             let next_q_values = self.forward(tensor_next_state);
             let target = if done {
                 reward
             } else {
-                reward + next_q_values.max().mul_scalar(self.config.gamma  )
+                reward + next_q_values.max().mul_scalar(self.config.gamma)
             };
 
             // Compute Q-value for the current state and action
             let q_values = self.forward(tensor_state.clone());
-            let q_value = q_values.select(0,action);//q_values.select(0, action  );
+            let q_value = q_values.select(0, action); //q_values.select(0, action  );
 
-           // let loss = burn::nn::loss::MseLoss::new().forward( q_value, target, Reduction::Sum);// 
-            let loss = (q_value - target).abs();//.require_grad();
-            // Gradients for the current backward pass
+            // let loss = burn::nn::loss::MseLoss::new().forward( q_value, target, Reduction::Sum);//
+            let loss = (q_value - target).abs(); //.require_grad();
+                                                 // Gradients for the current backward pass
             let grads = loss.backward();
             // Gradients linked to each parameter of the model.
             let grads2 = GradientsParams::from_grads(grads, &self.nn_model);
@@ -115,25 +116,19 @@ impl DQN {
             self.nn_model = optimizer.step(1.0e-2, self.nn_model.clone(), grads2);
 
             loss_string = loss.to_data().to_string();
-
-
         }
         loss_string
     }
-    
 
     pub fn extract_policy(&mut self) {
         self.env.reset();
         self.config.epsilon = 0.0;
 
-        while !self.action_record.is_empty(){
+        while !self.action_record.is_empty() {
             //let action = self.propose_action();
             let action = self.action_record.pop().unwrap();
-            self.env.step( action);
+            self.env.step(action);
             println!("{}, {:?}", action, self.env.current_state.clone());
         }
     }
-        
-    
 }
-
