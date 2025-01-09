@@ -47,18 +47,24 @@ impl DQN {
         let mut current_reward = 0.0;
         for j in 0..num_trials{
             let mut step_count = 0;
-            let target_update_period = 100;
+            let target_update_period = 5;
             for i in 0..num_episodes as usize {
                 let mut finish = false;
                 while !finish {
-                    step_count += 1;
-                    if step_count % target_update_period == 0 {
-                        self.update_target();
-                    }
+ 
                     let action = self.propose_action();
                     let result = self.env.step(action);
                     finish = self.env.done();
                     self.replay_buffer.add(result);
+                }
+
+
+                print_string = self.update_model(50);
+
+                step_count = i;
+                if step_count % target_update_period == 0 && i!=0 {
+                    self.update_target();
+                   // println!("target updated");
                 }
                 if self.env.reward() > current_reward {
                     self.action_record = self.env.action_record.clone();
@@ -68,9 +74,9 @@ impl DQN {
 
             }
 
-            print_string = self.update_model(100);
 
-            println!("{}\t{}\t{}", j, self.config.epsilon, print_string);
+
+           // println!("{}\t{}\t{}", j, self.config.epsilon, print_string);
             self.config.epsilon -= 0.8 / (num_trials as f64);
 
             
@@ -130,8 +136,11 @@ impl DQN {
             // Gradients linked to each parameter of the model.
             let grads2 = GradientsParams::from_grads(grads, &self.policy_model);
             // Update the model using the optimizer.
-            self.policy_model = optimizer.step(1.0e-2, self.policy_model.clone(), grads2);
+            self.policy_model = optimizer.step(self.config.lr, self.policy_model.clone(), grads2);
 
+            if self.config.epsilon <= 0.5 && self.config.epsilon >= 0.45 {
+              //  println!("{}", self.policy_model.forward(Tensor::<MyAutodiffBackend,1>::from( [3.,5.])) );
+            }
             loss_string = loss.to_data().to_string();
         }
         loss_string
@@ -145,7 +154,7 @@ impl DQN {
             //let action = self.propose_action();
             let action = self.action_record.pop().unwrap();
             self.env.step(action);
-            println!("{}, {:?}", action, self.env.current_state.clone());
+        //    println!("{}, {:?}", action, self.env.current_state.clone());
         }
     }
 
@@ -157,7 +166,7 @@ impl DQN {
             let action = self.propose_action();
             //let action = self.action_record.pop().unwrap();
             self.env.step(action);
-            println!("{}, {:?}", action, self.env.current_state.clone());
+          //  println!("{}, {:?}", action, self.env.current_state.clone());
         }
     }
 }

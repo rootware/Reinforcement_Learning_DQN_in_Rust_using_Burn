@@ -1,5 +1,5 @@
 use burn::{
-    module::{Param, ParamId}, nn::{Linear, LinearConfig, Relu}, prelude::*, tensor::backend::AutodiffBackend
+    module::{Param, ParamId}, nn::{Linear, LinearConfig, Relu, Sigmoid}, prelude::*, tensor::backend::AutodiffBackend
 };
 
 #[derive(Module, Debug)]
@@ -7,7 +7,8 @@ pub struct Model<B: Backend> {
     pub linear1: Linear<B>,
     pub linear2: Linear<B>,
     pub linear3: Linear<B>,
-    pub activation: Relu,
+    pub activation2: Sigmoid,
+    pub activation1: Sigmoid,
 }
 
 #[derive(Config, Debug)]
@@ -22,15 +23,16 @@ impl ModelConfig {
     pub fn init<B: Backend>(&self, device: &B::Device) -> Model<B> {
         Model {
             linear1: LinearConfig::new(self.state_size, self.hidden_size)
-                .with_bias(true)
+                .with_bias(true).with_initializer(nn::Initializer::XavierUniform { gain: 10.0})
                 .init(device),
             linear2: LinearConfig::new(self.hidden_size, self.hidden_size)
-                .with_bias(true)
+                .with_bias(true).with_initializer(nn::Initializer::XavierUniform { gain: 10.0 })
                 .init(device),
             linear3: LinearConfig::new(self.hidden_size, self.num_actions)
-                .with_bias(true)
+                .with_bias(true).with_initializer(nn::Initializer::XavierUniform { gain: 10.0 })
                 .init(device),
-            activation: Relu::new(),
+            activation2 : Sigmoid::new(),
+            activation1: Sigmoid::new(),
         }
     }
 }
@@ -47,11 +49,11 @@ impl<B: Backend> Model<B> {
         //let x = images.reshape([batch_size,  length]);
         let x = images;
         let x = self.linear1.forward(x);
-        let x = self.activation.forward(x);
+        let x = self.activation2.forward(x);
         let x = self.linear2.forward(x); // [batch_size, num_classes]
-        let x = self.activation.forward(x);
+        let x = self.activation2.forward(x);
         let x = self.linear3.forward(x);
-        let x = self.activation.forward(x);
+        let x = self.activation1.forward(x);
         x
     }
 }
