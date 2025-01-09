@@ -42,6 +42,7 @@ impl DQN {
     pub fn train(&mut self, num_episodes: i32, num_trials: i32) {
         let mut print_string = String::new();
         let mut current_reward = 0.0;
+        let record_step = 20;
         for i in 0..num_episodes as usize {
             let mut finish = false;
             while !finish {
@@ -50,11 +51,12 @@ impl DQN {
                 finish = self.env.done();
                 self.replay_buffer.add(result);
             }
-            if i % 20 == 0 {
+            if i % record_step == 0 {
                 print_string = self.update_model(50);
-                self.config.epsilon -= 0.8 / (num_episodes as f64);
 
                 println!("{}\t{}\t{}", i, self.config.epsilon, print_string);
+                self.config.epsilon -= 0.8 / (num_episodes as f64)* record_step as f64;
+
             }
             if self.env.reward() > current_reward {
                 self.action_record = self.env.action_record.clone();
@@ -127,6 +129,18 @@ impl DQN {
         while !self.action_record.is_empty() {
             //let action = self.propose_action();
             let action = self.action_record.pop().unwrap();
+            self.env.step(action);
+            println!("{}, {:?}", action, self.env.current_state.clone());
+        }
+    }
+
+    pub fn extract_policy_zero_epsilon(&mut self) {
+        self.env.reset();
+        self.config.epsilon = 0.0;
+
+        while !self.action_record.is_empty() {
+            let action = self.propose_action();
+            //let action = self.action_record.pop().unwrap();
             self.env.step(action);
             println!("{}, {:?}", action, self.env.current_state.clone());
         }

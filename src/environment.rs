@@ -1,7 +1,7 @@
 use crate::replay_buffer::Memory;
 use crate::utils::*;
 
-pub const TARGET : State = [10.0, 14.000001];
+pub const TARGET : State = [10.0, -14.000001];
 pub struct Environment {
     pub current_state: State,
     current_steps: i32,

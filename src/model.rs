@@ -24,13 +24,13 @@ impl ModelConfig {
     pub fn init<B: Backend>(&self, device: &B::Device) -> Model<B> {
         Model {
             linear1: LinearConfig::new(self.state_size, self.hidden_size)
-                .with_bias(false)
+                .with_bias(true)
                 .init(device),
             linear2: LinearConfig::new(self.hidden_size, self.hidden_size)
-                .with_bias(false)
+                .with_bias(true)
                 .init(device),
             linear3: LinearConfig::new(self.hidden_size, self.num_actions)
-                .with_bias(false)
+                .with_bias(true)
                 .init(device),
             activation: Relu::new(),
         }
