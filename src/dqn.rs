@@ -45,34 +45,35 @@ impl DQN {
     pub fn train(&mut self, num_episodes: i32, num_trials: i32) {
         let mut print_string = String::new();
         let mut current_reward = 0.0;
-        let record_step = 20;
-        let mut step_count = 0;
-        let target_update_period = 100;
-        for i in 0..num_episodes as usize {
-            let mut finish = false;
-            while !finish {
-                step_count += 1;
-                if step_count % target_update_period == 0 {
-                    self.update_target();
+        for j in 0..num_trials{
+            let mut step_count = 0;
+            let target_update_period = 100;
+            for i in 0..num_episodes as usize {
+                let mut finish = false;
+                while !finish {
+                    step_count += 1;
+                    if step_count % target_update_period == 0 {
+                        self.update_target();
+                    }
+                    let action = self.propose_action();
+                    let result = self.env.step(action);
+                    finish = self.env.done();
+                    self.replay_buffer.add(result);
                 }
-                let action = self.propose_action();
-                let result = self.env.step(action);
-                finish = self.env.done();
-                self.replay_buffer.add(result);
-            }
-            if self.env.reward() > current_reward {
-                self.action_record = self.env.action_record.clone();
-                current_reward = self.env.reward();
-            }
-            self.env.reset();
-            if i % record_step == 0 {
-                print_string = self.update_model(50);
-
-                println!("{}\t{}\t{}", i, self.config.epsilon, print_string);
-                self.config.epsilon -= 0.8 / (num_episodes as f64)* record_step as f64;
+                if self.env.reward() > current_reward {
+                    self.action_record = self.env.action_record.clone();
+                    current_reward = self.env.reward();
+                }
+                self.env.reset();
 
             }
 
+            print_string = self.update_model(100);
+
+            println!("{}\t{}\t{}", j, self.config.epsilon, print_string);
+            self.config.epsilon -= 0.8 / (num_trials as f64);
+
+            
         }
     }
 
@@ -84,9 +85,9 @@ impl DQN {
             return rng.gen_range(0..NUM_ACTIONS) as i32;
         } else {
             let q_val = self.target_model.forward(Tensor::<MyAutodiffBackend, 1>::from(self.env.current_state));
-            let max: Result<Vec<i32>, _> = q_val.argmax(0).to_data().to_vec();
+            let max: Result<Vec<i64>, _> = q_val.argmax(0).to_data().to_vec();
             let mut max2 = max.unwrap();
-            max2.pop().unwrap()
+            max2.pop().unwrap() as i32
         }
     }
 

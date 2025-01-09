@@ -29,12 +29,16 @@ fn main() {
     // Initialize DQN model and optimizer
     let mut dqn_model = DQN::new(model.clone(), model.clone(),ReplayBuffer::new(100000), myconfig.clone());
 
-    dqn_model.train(100, 1000);
-    println!("zero epsilon policy");
-    dqn_model.extract_policy_zero_epsilon();
-    println!("best ever policy");
-    dqn_model.extract_policy();
+   // dqn_model.train(100, 1000);
+    //println!("zero epsilon policy");
+    //dqn_model.extract_policy_zero_epsilon();
+    //println!("best ever policy");
+   // dqn_model.extract_policy();
 
-
+   let q_val = dqn_model.forward(Tensor::<MyAutodiffBackend, 1>::from(dqn_model.env.current_state));
+   println!("{}",  q_val.clone());
+   let max_q:Result<Vec<i64>, _> = q_val.clone().argmax(0).to_data().to_vec();
+   println!("{:?}", max_q.unwrap());
+   println!("{}", q_val.max().mul_scalar(dqn_model.config.gamma));
 
 }

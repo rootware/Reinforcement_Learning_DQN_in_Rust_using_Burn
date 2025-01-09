@@ -1,7 +1,7 @@
 use crate::replay_buffer::Memory;
 use crate::utils::*;
 
-pub const TARGET : State = [10.0, -14.000001];
+pub const TARGET : State = [3.0, 5.000001];
 pub struct Environment {
     pub current_state: State,
     current_steps: i32,
@@ -43,7 +43,10 @@ impl Environment {
         (state[0]  - TARGET[0]).powi(2) + (state[1]-TARGET[1]).powi(2) 
     }
     pub fn reward(&self) -> f64 {
-        1.0 / self.distance2(&self.current_state)
+       // 0.000001 - 1./self.distance2(&[0.0, 0.0]) + 1.0 / self.distance2(&self.current_state)
+       let f = self.distance2(&self.current_state)/self.distance2(&[-3.,5.]) ;
+       f64::exp((1.-f)/f )
+       
     }
 
     pub fn done(&self) -> bool {

@@ -1,7 +1,5 @@
 use burn::{
-    nn::{Linear, LinearConfig, Relu},
-    prelude::*,
-    tensor::backend::AutodiffBackend,
+    module::{Param, ParamId}, nn::{Linear, LinearConfig, Relu}, prelude::*, tensor::backend::AutodiffBackend
 };
 
 #[derive(Module, Debug)]
@@ -73,6 +71,12 @@ impl<B: AutodiffBackend> Model<B> {
             b.linear1.weight.val()
         });
 
+        a.linear1.bias = match (&b.linear1.bias) {
+            (Some(b_bias)) => Some(Param::initialized(ParamId::new(), b_bias.val())),
+            _ => None,
+        };
+
+        
         //let mut bias  = *(a.linear1.bias.as_mut().unwrap());
         //*bias = (*bias)
         //  .map(|_| b.linear1.bias.as_ref().unwrap().val().mul_scalar(beta) + c.linear1.bias.as_ref().unwrap().val().mul_scalar(1. - beta));
@@ -81,10 +85,19 @@ impl<B: AutodiffBackend> Model<B> {
             b.linear2.weight.val()
         });
 
+        a.linear2.bias = match (&b.linear2.bias) {
+            (Some(b_bias)) => Some(Param::initialized(ParamId::new(), b_bias.val())),
+            _ => None,
+        };
+
         a.linear3.weight = a.linear3.weight.map(|_| {
             b.linear3.weight.val()
         });
 
+        a.linear3.bias = match (&b.linear3.bias) {
+            (Some(b_bias)) => Some(Param::initialized(ParamId::new(), b_bias.val())),
+            _ => None,
+        };
       //  println!("a after: {}", a.linear1.weight.val());
 
         a

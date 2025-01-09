@@ -7,6 +7,8 @@ name = "Reinforcement_Learning_DQN_using_Burn"
 version = "0.1.0"
 dependencies = [
  "burn",
+ "burn-cuda",
+ "burn-tch",
  "csv",
  "rand",
 ]
