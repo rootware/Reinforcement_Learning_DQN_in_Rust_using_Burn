@@ -68,8 +68,6 @@ impl<B: Backend> Model<B> {
 
 impl<B: AutodiffBackend> Model<B> {
     pub fn copy_model(mut a: Model<B>, b: &Model<B>) -> Model<B> {
-
-
         a.linear1.weight = a.linear1.weight.map(|_| b.linear1.weight.val());
 
         a.linear1.bias = match (&b.linear1.bias) {
@@ -102,39 +100,55 @@ impl<B: AutodiffBackend> Model<B> {
 
 impl<B: AutodiffBackend> Model<B> {
     pub fn soft_copy_model(mut a: Model<B>, b: &Model<B>, weight: f64) -> Model<B> {
-
         if weight < 0. || weight > 1. {
             println!("Weight is outside bounds: must be within 0 and 1.");
         }
 
-
-        a.linear1.weight = a.linear1.weight.map(|w| w.mul_scalar(1.-weight) + b.linear1.weight.val().mul_scalar(weight));
-        let bias =  match (&b.linear1.bias) {
+        a.linear1.weight = a
+            .linear1
+            .weight
+            .map(|w| w.mul_scalar(1. - weight) + b.linear1.weight.val().mul_scalar(weight));
+        let bias = match (&b.linear1.bias) {
             (Some(b_bias)) => b_bias.val(),
             _ => Tensor::<B, 1>::from([0.0]),
         };
         a.linear1.bias = match (&a.linear1.bias) {
-            (Some(a_bias)) => Some(Param::initialized(ParamId::new(), a_bias.val().mul_scalar(1.0 - weight) + bias.mul_scalar(weight) )),
+            (Some(a_bias)) => Some(Param::initialized(
+                ParamId::new(),
+                a_bias.val().mul_scalar(1.0 - weight) + bias.mul_scalar(weight),
+            )),
             _ => None,
         };
-      
-        a.linear2.weight = a.linear2.weight.map(|w| w.mul_scalar(1.-weight) + b.linear2.weight.val().mul_scalar(weight));
-        let bias =  match (&b.linear2.bias) {
+
+        a.linear2.weight = a
+            .linear2
+            .weight
+            .map(|w| w.mul_scalar(1. - weight) + b.linear2.weight.val().mul_scalar(weight));
+        let bias = match (&b.linear2.bias) {
             (Some(b_bias)) => b_bias.val(),
             _ => Tensor::<B, 1>::from([0.0]),
         };
         a.linear2.bias = match (&a.linear2.bias) {
-            (Some(a_bias)) => Some(Param::initialized(ParamId::new(), a_bias.val().mul_scalar(1.0 - weight) + bias.mul_scalar(weight) )),
+            (Some(a_bias)) => Some(Param::initialized(
+                ParamId::new(),
+                a_bias.val().mul_scalar(1.0 - weight) + bias.mul_scalar(weight),
+            )),
             _ => None,
         };
 
-        a.linear3.weight = a.linear3.weight.map(|w| w.mul_scalar(1.-weight) + b.linear3.weight.val().mul_scalar(weight));
-        let bias =  match (&b.linear3.bias) {
+        a.linear3.weight = a
+            .linear3
+            .weight
+            .map(|w| w.mul_scalar(1. - weight) + b.linear3.weight.val().mul_scalar(weight));
+        let bias = match (&b.linear3.bias) {
             (Some(b_bias)) => b_bias.val(),
             _ => Tensor::<B, 1>::from([0.0]),
         };
         a.linear3.bias = match (&a.linear3.bias) {
-            (Some(a_bias)) => Some(Param::initialized(ParamId::new(), a_bias.val().mul_scalar(1.0 - weight) + bias.mul_scalar(weight) )),
+            (Some(a_bias)) => Some(Param::initialized(
+                ParamId::new(),
+                a_bias.val().mul_scalar(1.0 - weight) + bias.mul_scalar(weight),
+            )),
             _ => None,
         };
 
