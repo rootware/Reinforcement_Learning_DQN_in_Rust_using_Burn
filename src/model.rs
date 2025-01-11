@@ -5,8 +5,6 @@ use burn::{
     tensor::backend::AutodiffBackend,
 };
 
-use crate::MyAutodiffBackend;
-
 #[derive(Module, Debug)]
 pub struct Model<B: Backend> {
     pub linear1: Linear<B>,
@@ -109,11 +107,11 @@ impl<B: AutodiffBackend> Model<B> {
             .weight
             .map(|w| w.mul_scalar(1. - weight) + b.linear1.weight.val().mul_scalar(weight));
         let bias = match (&b.linear1.bias) {
-            (Some(b_bias)) => b_bias.val(),
+            Some(b_bias) => b_bias.val(),
             _ => Tensor::<B, 1>::from([0.0]),
         };
-        a.linear1.bias = match (&a.linear1.bias) {
-            (Some(a_bias)) => Some(Param::initialized(
+        a.linear1.bias = match &a.linear1.bias {
+            Some(a_bias) => Some(Param::initialized(
                 ParamId::new(),
                 a_bias.val().mul_scalar(1.0 - weight) + bias.mul_scalar(weight),
             )),
@@ -124,12 +122,12 @@ impl<B: AutodiffBackend> Model<B> {
             .linear2
             .weight
             .map(|w| w.mul_scalar(1. - weight) + b.linear2.weight.val().mul_scalar(weight));
-        let bias = match (&b.linear2.bias) {
-            (Some(b_bias)) => b_bias.val(),
+        let bias = match &b.linear2.bias {
+            Some(b_bias) => b_bias.val(),
             _ => Tensor::<B, 1>::from([0.0]),
         };
-        a.linear2.bias = match (&a.linear2.bias) {
-            (Some(a_bias)) => Some(Param::initialized(
+        a.linear2.bias = match &a.linear2.bias {
+            Some(a_bias) => Some(Param::initialized(
                 ParamId::new(),
                 a_bias.val().mul_scalar(1.0 - weight) + bias.mul_scalar(weight),
             )),
@@ -140,12 +138,12 @@ impl<B: AutodiffBackend> Model<B> {
             .linear3
             .weight
             .map(|w| w.mul_scalar(1. - weight) + b.linear3.weight.val().mul_scalar(weight));
-        let bias = match (&b.linear3.bias) {
-            (Some(b_bias)) => b_bias.val(),
+        let bias = match &b.linear3.bias {
+            Some(b_bias) => b_bias.val(),
             _ => Tensor::<B, 1>::from([0.0]),
         };
-        a.linear3.bias = match (&a.linear3.bias) {
-            (Some(a_bias)) => Some(Param::initialized(
+        a.linear3.bias = match &a.linear3.bias {
+            Some(a_bias) => Some(Param::initialized(
                 ParamId::new(),
                 a_bias.val().mul_scalar(1.0 - weight) + bias.mul_scalar(weight),
             )),

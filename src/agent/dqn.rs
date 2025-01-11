@@ -6,7 +6,7 @@ use burn::{
     optim::{AdamConfig, GradientsParams},
     tensor::{Int, Tensor},
 };
-use environment::Environment;
+use environment::twodgrid::Environment;
 use model::Model;
 use rand::Rng;
 
@@ -43,10 +43,10 @@ impl DQN {
     }
 
     pub fn train(&mut self, num_episodes: i32, num_trials: i32) {
-        let mut print_string = String::new();
+        // let mut print_string = String::new();
         let mut current_reward = 0.0;
-        for j in 0..num_trials {
-            let mut step_count = 0;
+        for _j in 0..num_trials {
+            //let mut step_count = 0;
             let target_update_period = 5;
             for i in 0..num_episodes as usize {
                 let mut finish = false;
@@ -57,10 +57,11 @@ impl DQN {
                     self.replay_buffer.add(result);
                 }
 
-                print_string = self.update_model(50);
-
-                step_count = i;
-                if step_count % target_update_period == 0 && i != 0 {
+                //print_string = self.update_model(50);
+                self.update_model(50);
+                //step_count = i;
+                //if step_count % target_update_period == 0 && i != 0 {
+                if i % target_update_period == 0 && i != 0 {
                     self.update_target();
                     // println!("target updated");
                 }

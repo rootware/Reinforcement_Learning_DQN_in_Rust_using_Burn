@@ -1,4 +1,4 @@
-pub mod dqn;
+pub mod agent;
 pub mod environment;
 pub mod model;
 pub mod replay_buffer;
@@ -7,8 +7,7 @@ pub mod utils;
 use burn_tch::LibTorchDevice;
 
 //use burn_cuda::CudaDevice;
-use dqn::DQN;
-use model::Model;
+use crate::agent::dqn::DQN;
 use replay_buffer::ReplayBuffer;
 use utils::*;
 
