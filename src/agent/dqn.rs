@@ -1,7 +1,9 @@
 use crate::replay_buffer::ReplayBuffer;
 use crate::utils::*;
-use crate::{environment, model}; // For experience replay
+use crate::{environment, model}; use burn::optim::adaptor::OptimizerAdaptor;
+// For experience replay
 use burn::optim::Optimizer;
+use burn::prelude::Backend;
 use burn::{
     optim::{AdamConfig, GradientsParams},
     tensor::{Int, Tensor},
@@ -18,7 +20,7 @@ pub struct DQN {
     pub replay_buffer: ReplayBuffer,
     pub config: MyConfig,
     pub action_record: Vec<i32>,
-    // pub optimizer: burn::optim::adaptor::OptimizerAdaptor<Adam<_>, _, _> ,
+    pub optimizer: OptimizerAdaptor<burn::optim::Adam<MyBackend>, Model<MyAutodiffBackend>,MyAutodiffBackend>,
 }
 
 impl DQN {
@@ -28,6 +30,9 @@ impl DQN {
         replay_buffer: ReplayBuffer,
         config: MyConfig,
     ) -> Self {
+        let optimizer = AdamConfig::new()
+        //.with_epsilon(config.epsilon as f32)
+        .init();
         DQN {
             env: Environment::new(),
             policy_model: policy,
@@ -35,6 +40,7 @@ impl DQN {
             replay_buffer,
             config,
             action_record: Vec::new(),
+            optimizer,
         }
     }
 
@@ -97,9 +103,9 @@ impl DQN {
         self.target_model = Model::copy_model(self.target_model.clone(), &self.policy_model);
     }
     pub fn update_model(&mut self, batch_size: usize) -> String {
-        let mut optimizer = AdamConfig::new()
+     /*   let mut optimizer = AdamConfig::new()
             .with_epsilon(self.config.epsilon as f32)
-            .init();
+            .init();*/
         // Sample a batch of experiences from the replay buffer
         let batch = self.replay_buffer.sample(batch_size);
         let mut loss_string = String::new();
@@ -122,17 +128,20 @@ impl DQN {
 
             // Compute Q-value for the current state and action
             let q_values = self.forward(tensor_state.clone());
-            let q_value = q_values.select(0, action);
-            let loss = (q_value - target).abs(); //.require_grad();
+            let q_value = q_values.select(0, action.clone());
+            let loss = (q_value - target.clone()).abs(); //.require_grad();
                                                  // Gradients for the current backward pass
+                                                 
+            // println!("Old loss: {}\t{}", tensor_state.to_data(), loss.to_data());
             let grads = loss.backward();
+
             // Gradients linked to each parameter of the model.
             let grads2 = GradientsParams::from_grads(grads, &self.policy_model);
             // Update the model using the optimizer.
-            self.policy_model = optimizer.step(self.config.lr, self.policy_model.clone(), grads2);
+            self.policy_model = self.optimizer.step(self.config.lr, self.policy_model.clone(), grads2);
 
-            if self.config.epsilon <= 0.5 && self.config.epsilon >= 0.45 {}
-            loss_string = loss.to_data().to_string();
+            let loss2 = ( (self.forward(tensor_state.clone())).select(0, action) - target).abs();
+           // println!("New loss - old loss: {}\t{}", tensor_state.to_data(),( (loss.clone()-loss2)/loss.clone()).to_data());
         }
         loss_string
     }
@@ -155,7 +164,7 @@ impl DQN {
         while !self.env.done() {
             let action = self.propose_action();
             self.env.step(action);
-            println!("{:?}", self.env.current_state);
+            println!("{:?}, {}", self.env.current_state, self.policy_model.forward( Tensor::<MyAutodiffBackend,1>::from(self.env.current_state)).to_data());
 
         }
     }

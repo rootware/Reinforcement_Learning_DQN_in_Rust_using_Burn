@@ -48,9 +48,10 @@ impl ReplayBuffer {
     }
 
     pub fn sample(&self, batch_size: usize) -> Vec<Memory> {
+        let amount = usize::min(batch_size , self.buffer.len() );
         let mut rng = rand::thread_rng();
         self.buffer
-            .choose_multiple(&mut rng, batch_size)
+            .choose_multiple(&mut rng, amount)
             .cloned()
             .collect()
     }

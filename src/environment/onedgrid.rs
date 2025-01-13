@@ -1,3 +1,5 @@
+use rand::Rng;
+
 use crate::replay_buffer::Memory;
 
 pub const STATE_SIZE: usize = 2;
@@ -5,7 +7,7 @@ pub const HIDDEN_SIZE: usize = 6;
 pub const NUM_ACTIONS: usize = 2;
 pub type State = [f64; STATE_SIZE];
 
-pub const TARGET: State = [9.00001, 0.];
+pub const TARGET: State = [-2.01, 0.];
 pub struct Environment {
     pub current_state: State,
     current_steps: i32,
@@ -43,9 +45,26 @@ impl Environment {
         (state[0] - TARGET[0]).powi(2) + (state[1] - TARGET[1]).powi(2)
     }
     pub fn reward(&self) -> f64 {
-        let f = self.distance2(&self.current_state) / self.distance2(&[-3., 5.]);
-        f64::exp((1. - f) / (0.1 + f))
+       // let f = self.distance2(&self.current_state) / self.distance2(&[-3., 5.]);
+        //f64::exp((1. - f) / (0.1 + f))
+        if self.done() {
+            1./self.distance2(&self.current_state)
+        }
+        else {
+            0.
+        }
     }
+
+    pub fn reward_calc(&self, state: &State) -> f64 {
+        // let f = self.distance2(&self.current_state) / self.distance2(&[-3., 5.]);
+         //f64::exp((1. - f) / (0.1 + f))
+         if (state[0] - TARGET[0]).abs() <= 0.5 {
+             1./self.distance2(&state)
+         }
+         else {
+             0.
+         }
+     }
 
     pub fn done(&self) -> bool {
         if self.current_steps >= self.maxsteps || self.distance2(&self.current_state) <= 0.01 {
@@ -59,13 +78,20 @@ impl Environment {
         Environment {
             current_state: [0.0, 0.0],
             current_steps: 0,
-            maxsteps: 10,
+            maxsteps: 15,
             action_record: Vec::new(),
         }
     }
 
     pub fn reset(&mut self) {
-        self.current_state = [0.0, 0.0];
+
+        let mut rng = rand::thread_rng();
+    
+        let min = -11; // Lower bound
+        let max = 11; // Upper bound
+
+        let random_number = rng.gen_range(min..=max);
+        self.current_state = [random_number as f64, 0.0];
         self.current_steps = 0;
         self.action_record = Vec::new();
     }

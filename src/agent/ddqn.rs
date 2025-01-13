@@ -154,7 +154,7 @@ impl DDQN {
         while !self.env.done() {
             let action = self.propose_action();
             self.env.step(action);
-            println!("{:?}", self.env.current_state);
+            println!("{:?}, {}", self.env.current_state, self.target_model.forward( Tensor::<MyAutodiffBackend,1>::from(self.env.current_state)).to_data());
 
         }
     }
