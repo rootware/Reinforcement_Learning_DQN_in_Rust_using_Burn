@@ -5,7 +5,7 @@ pub mod replay_buffer;
 //pub mod training;
 pub mod utils;
 use burn_tch::LibTorchDevice;
-
+use environment::onedgrid::*;
 //use burn_cuda::CudaDevice;
 use crate::agent::{ddqn::DDQN, dqn::DQN};
 use replay_buffer::ReplayBuffer;
@@ -38,13 +38,13 @@ fn main() {
         myconfig.clone(),
     );
 
-    dqn_model.train(100, 100);
+    dqn_model.train(20, 5);
     println!("zero epsilon policy");
     dqn_model.extract_policy_zero_epsilon();
     println!("best ever policy");
     dqn_model.extract_policy();
 
-    ddqn_model.train(100, 100);
+    ddqn_model.train(20, 5);
     println!("zero epsilon policy");
     ddqn_model.extract_policy_zero_epsilon();
     println!("best ever policy");

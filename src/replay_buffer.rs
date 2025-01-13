@@ -1,6 +1,6 @@
 use rand::seq::SliceRandom; // For experience replay
 
-use crate::utils::*;
+use crate::environment::onedgrid::*;
 #[derive(Clone)]
 pub struct Memory {
     pub current_state: State,

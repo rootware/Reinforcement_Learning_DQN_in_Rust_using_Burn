@@ -1,11 +1,11 @@
 use crate::replay_buffer::Memory;
-use crate::utils::*;
 
 pub const STATE_SIZE: usize = 2;
-pub const HIDDEN_SIZE: usize = 2;
-pub const NUM_ACTIONS: usize = 4;
+pub const HIDDEN_SIZE: usize = 6;
+pub const NUM_ACTIONS: usize = 2;
 pub type State = [f64; STATE_SIZE];
-pub const TARGET: State = [3.0, 5.000001];
+
+pub const TARGET: State = [9.00001, 0.];
 pub struct Environment {
     pub current_state: State,
     current_steps: i32,
@@ -20,15 +20,13 @@ impl Environment {
         let prev_state = self.current_state.clone();
         if action == 0 {
             self.current_state[0] += 1.0;
+            self.current_state[0] = (self.current_state[0] as i32 % 11) as f64;
         }
         if action == 1 {
-            self.current_state[1] += 1.0;
-        }
-        if action == 2 {
             self.current_state[0] -= 1.0;
-        }
-        if action == 3 {
-            self.current_state[1] -= 1.0;
+
+            self.current_state[0] = (self.current_state[0] as i32 % 11) as f64;
+
         }
 
         self.action_record.push(action);

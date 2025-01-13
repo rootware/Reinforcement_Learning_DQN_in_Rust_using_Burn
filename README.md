@@ -28,3 +28,4 @@ Model contains the neural network being used for learning the Q-values  and acti
 - ~Use Libtorch backend if possible~ Using Libtorch backend
 - Test on more involved examples to see if it's successfully learning e.g. shaken lattice repo
 - Implement double deep by adding a target and policy network with soft and hard updates
+- DDQN implementation takes significantly longer than DQN to run. While this might make some sense given the more frequent updating, I need to make sure there's some suboptimal code somehwere.

@@ -6,7 +6,7 @@ use burn::{
     optim::{AdamConfig, GradientsParams},
     tensor::{Int, Tensor},
 };
-use environment::twodgrid::Environment;
+use environment::onedgrid::*;
 use model::Model;
 use rand::Rng;
 
@@ -142,6 +142,8 @@ impl DDQN {
         while !self.action_record.is_empty() {
             let action = self.action_record.pop().unwrap();
             self.env.step(action);
+            println!("{:?}", self.env.current_state);
+
         }
     }
 
@@ -152,6 +154,8 @@ impl DDQN {
         while !self.env.done() {
             let action = self.propose_action();
             self.env.step(action);
+            println!("{:?}", self.env.current_state);
+
         }
     }
 }
