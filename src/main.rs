@@ -18,7 +18,7 @@ fn main() {
         .init::<MyAutodiffBackend>(&device);
     let myconfig = MyConfig {
         gamma: 0.99,
-        lr: 0.9,
+        lr: 1.0,
         epsilon: 1.0,
         tau: 0.2,
     };
@@ -38,7 +38,7 @@ fn main() {
         ReplayBuffer::new(1000),
         myconfig.clone(),
     );
-    dqn_model.train(100, 100);
+    dqn_model.train(50, 50);
     //ddqn_model.train(1, 1);
 
     dqn_model.update_target();

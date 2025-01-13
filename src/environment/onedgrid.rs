@@ -78,7 +78,7 @@ impl Environment {
         Environment {
             current_state: [0.0, 0.0],
             current_steps: 0,
-            maxsteps: 15,
+            maxsteps: 20,
             action_record: Vec::new(),
         }
     }
