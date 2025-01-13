@@ -47,8 +47,7 @@ impl DDQN {
         let mut current_reward = 0.0;
         for _j in 0..num_trials {
             //let mut step_count = 0;
-            let target_update_period = 5;
-            for i in 0..num_episodes as usize {
+            for _i in 0..num_episodes as usize {
                 let mut finish = false;
                 while !finish {
                     let action = self.propose_action();
@@ -89,7 +88,11 @@ impl DDQN {
 
     pub fn update_target(&mut self) {
         // self.target_model = Model::copy_model(self.target_model.clone(), &self.policy_model);
-        self.target_model = Model::soft_copy_model(self.target_model.clone(), &self.policy_model, self.config.tau);
+        self.target_model = Model::soft_copy_model(
+            self.target_model.clone(),
+            &self.policy_model,
+            self.config.tau,
+        );
     }
     pub fn update_model(&mut self, batch_size: usize) -> String {
         let mut optimizer = AdamConfig::new()

@@ -1,6 +1,6 @@
 use burn::{
     module::{Param, ParamId},
-    nn::{Linear, LinearConfig, Relu, Sigmoid},
+    nn::{Linear, LinearConfig, Sigmoid},
     prelude::*,
     tensor::backend::AutodiffBackend,
 };
