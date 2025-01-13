@@ -34,7 +34,7 @@ fn main() {
     println!("{}", ddqn_model.policy_model.linear2.weight.val().to_data());
     println!("{}", ddqn_model.policy_model.linear3.weight.val().to_data());
 
-    ddqn_model.train(50, 2);
+    ddqn_model.train(50, 20);
 
     println!("{}", ddqn_model.policy_model.linear1.weight.val().to_data());
     println!("{}", ddqn_model.policy_model.linear2.weight.val().to_data());
