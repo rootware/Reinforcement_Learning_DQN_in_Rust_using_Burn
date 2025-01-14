@@ -97,7 +97,6 @@ impl Environment {
         let min = -11; // Lower bound
         let max = 11; // Upper bound
 
-        let random_number = rng.gen_range(min..=max);
         self.current_state = [0.];//[random_number as f64];
         self.current_steps = 0;
         self.action_record = Vec::new();
