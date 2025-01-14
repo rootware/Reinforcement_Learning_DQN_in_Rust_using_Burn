@@ -18,14 +18,13 @@ Model contains the neural network being used for learning the Q-values  and acti
 - Changed to Xavier initialization
 - Organized files
 - Implemented the model weighted copy function to set up for implementing DDQN.
-- For some reason, Sigmoid gives better results for Q-Table than ReLu
-- While it can often find the best policy, if an entry in the Q-Table becomes zero it tends to stays zero. Unsure why this is happening.
-- Disparity between best policy and the zero epsilon policy. Am testing by printing out Q-Tables for examples.
+- On some tested case, ReLU was running into the "dying ReLU neurons" issue. CIrcumvented by adding a Leaky ReLU.
+- The DDQN (implemented in `ddqn.rs`) was benchmarked. Need to rewrite DQN (implemented in `dqn.rs`) to be similar in notation to how it's done in literature.
+- Improve batching.
+- Improve how and when constants such as `STATE_SIZE, HIDDEN_SIZE, NUM_ACTIONS` are defined.
 
 ## Specific To-Dos:
 - Implement epsilon greedy : right now, have epsilon decreasing but it doesn't use a function and is done manually
 - ~Move towards epochs and proper batching of samples from replay buffer~
 - ~Use Libtorch backend if possible~ Using Libtorch backend
 - Test on more involved examples to see if it's successfully learning e.g. shaken lattice repo
-- Implement double deep by adding a target and policy network with soft and hard updates
-- DDQN implementation takes significantly longer than DQN to run. While this might make some sense given the more frequent updating, I need to make sure there's some suboptimal code somehwere.
