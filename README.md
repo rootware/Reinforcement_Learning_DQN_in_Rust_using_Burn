@@ -1,8 +1,20 @@
 # Reinforcement Learning (double deep Q-learning) in Rust using Burn API
 ## Preliminary Notes
+<<<<<<< Updated upstream
 As you can see from my Github, I usually work in applying Reinforcement Learning to physics design problems (see [paper](https://arxiv.org/abs/2405.07907) ).. The codebase I usually use is owned by the JILA team, implements double deep Q-Networks and is in C++. I usually couple that to my C++ / Rust physics simulations.
 
 This is an ongoing repo where, partly for my own edification, I implement a double deep Q-Network learning RL in Rust. Goal was to gain solidify my foundation in RL + gain familiarity with the Burn API in Rust for doing ML. Eventually I'd like to make a pure Rust repo where both my RL and my simulations are in Rust. It's very much a work in progress, especially as I learn more about Burn, so let me know if you see any issues. There's a lot of code fixing and testing to be done.
+=======
+<<<<<<< HEAD
+As you can see from my Github, I usually work in applying Reinforcement Learning to physics design problems. The codebase I usually use is owned by the JILA team, implements double deep Q-Networks and is in C++. I usually couple that to my C++ / Rust physics simulations.
+
+This is an ongoing repo where, mostly for my own edification, I implement a deep Q-Network RL in Rust. Goal was to gain solidify my foundation in RL + gain familiarity with the Burn API in Rust for doing ML. Eventually I'd like to make a pure Rust repo where both my RL and my simulations are in Rust. It's very much a work in progress, especially as I learn more about Burn, so let me know if you see any issues. There's a lot of code fixing and testing to be done.
+=======
+As you can see from my Github, I usually work in applying Reinforcement Learning to physics design problems (see [paper](https://arxiv.org/abs/2405.07907) ).. The codebase I usually use is owned by the JILA team, implements double deep Q-Networks and is in C++. I usually couple that to my C++ / Rust physics simulations.
+
+This is an ongoing repo where, partly for my own edification, I implement a double deep Q-Network learning RL in Rust. Goal was to gain solidify my foundation in RL + gain familiarity with the Burn API in Rust for doing ML. Eventually I'd like to make a pure Rust repo where both my RL and my simulations are in Rust. It's very much a work in progress, especially as I learn more about Burn, so let me know if you see any issues. There's a lot of code fixing and testing to be done.
+>>>>>>> e583fbe140ff9b9e7509b3a2dda6ebfbb4eeb60f
+>>>>>>> Stashed changes
 Eventually after that, I'd like to implement and play around with physics informed variations of double deep Q- Networks.
 
 P.S. I recently learned the Burn project, in their github examples folder, actually offers a DQN example. Mine is a lot more coarse, but I hope to experiment around with mine to customize it for as much policy interpretability as possible as well as designing physics informed RL. Especially for usecases like my github repo [lattice evolution](https://github.com/rootware/lattice_evolution).
@@ -18,13 +30,33 @@ Model contains the neural network being used for learning the Q-values  and acti
 - Changed to Xavier initialization
 - Organized files
 - Implemented the model weighted copy function to set up for implementing DDQN.
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+- For some reason, Sigmoid gives better results for Q-Table than ReLu
+- While it can often find the best policy, if an entry in the Q-Table becomes zero it tends to stays zero. Unsure why this is happening.
+- Disparity between best policy and the zero epsilon policy. Am testing by printing out Q-Tables for examples.
+=======
+>>>>>>> Stashed changes
 - On some tested case, ReLU was running into the "dying ReLU neurons" issue. CIrcumvented by adding a Leaky ReLU.
 - The DDQN (implemented in `ddqn.rs`) was benchmarked. Need to rewrite DQN (implemented in `dqn.rs`) to be similar in notation to how it's done in literature.
 - Improve batching.
 - Improve how and when constants such as `STATE_SIZE, HIDDEN_SIZE, NUM_ACTIONS` are defined.
+<<<<<<< Updated upstream
+=======
+>>>>>>> e583fbe140ff9b9e7509b3a2dda6ebfbb4eeb60f
+>>>>>>> Stashed changes
 
 ## Specific To-Dos:
 - Implement epsilon greedy : right now, have epsilon decreasing but it doesn't use a function and is done manually
 - ~Move towards epochs and proper batching of samples from replay buffer~
 - ~Use Libtorch backend if possible~ Using Libtorch backend
 - Test on more involved examples to see if it's successfully learning e.g. shaken lattice repo
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+- Implement double deep by adding a target and policy network with soft and hard updates
+- DDQN implementation takes significantly longer than DQN to run. While this might make some sense given the more frequent updating, I need to make sure there's some suboptimal code somehwere.
+=======
+>>>>>>> e583fbe140ff9b9e7509b3a2dda6ebfbb4eeb60f
+>>>>>>> Stashed changes

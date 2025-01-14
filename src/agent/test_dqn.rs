@@ -6,12 +6,26 @@ use burn::{
     optim::{AdamConfig, GradientsParams},
     tensor::{Int, Tensor},
 };
+<<<<<<< Updated upstream
 use environment::twodgrid::Environment;
 use test_model::Model;
 use rand::Rng;
 
 // Define a simple neural network for Q-function approximation
 pub struct DQN {
+=======
+<<<<<<<< HEAD:src/agent/test_dqn.rs
+use environment::twodgrid::Environment;
+use test_model::Model;
+========
+use environment::onedgrid::*;
+use model::Model;
+>>>>>>>> e583fbe140ff9b9e7509b3a2dda6ebfbb4eeb60f:src/agent/ddqn.rs
+use rand::Rng;
+
+// Define a simple neural network for Q-function approximation
+pub struct DDQN {
+>>>>>>> Stashed changes
     pub env: Environment,
     pub policy_model: Model<MyAutodiffBackend>,
     pub target_model: Model<MyAutodiffBackend>,
@@ -21,14 +35,22 @@ pub struct DQN {
     // pub optimizer: burn::optim::adaptor::OptimizerAdaptor<Adam<_>, _, _> ,
 }
 
+<<<<<<< Updated upstream
 impl DQN {
+=======
+impl DDQN {
+>>>>>>> Stashed changes
     pub fn new(
         policy: Model<MyAutodiffBackend>,
         target: Model<MyAutodiffBackend>,
         replay_buffer: ReplayBuffer,
         config: MyConfig,
     ) -> Self {
+<<<<<<< Updated upstream
         DQN {
+=======
+        DDQN {
+>>>>>>> Stashed changes
             env: Environment::new(),
             policy_model: policy,
             target_model: target,
@@ -47,8 +69,17 @@ impl DQN {
         let mut current_reward = 0.0;
         for _j in 0..num_trials {
             //let mut step_count = 0;
+<<<<<<< Updated upstream
             let target_update_period = 5;
             for i in 0..num_episodes as usize {
+=======
+<<<<<<<< HEAD:src/agent/test_dqn.rs
+            let target_update_period = 5;
+            for i in 0..num_episodes as usize {
+========
+            for _i in 0..num_episodes as usize {
+>>>>>>>> e583fbe140ff9b9e7509b3a2dda6ebfbb4eeb60f:src/agent/ddqn.rs
+>>>>>>> Stashed changes
                 let mut finish = false;
                 while !finish {
                     let action = self.propose_action();
@@ -56,6 +87,10 @@ impl DQN {
                     finish = self.env.done();
                     self.replay_buffer.add(result);
                 }
+<<<<<<< Updated upstream
+=======
+<<<<<<<< HEAD:src/agent/test_dqn.rs
+>>>>>>> Stashed changes
 
                 //print_string = self.update_model(50);
                 self.update_model(50);
@@ -65,6 +100,15 @@ impl DQN {
                     self.update_target();
                     // println!("target updated");
                 }
+<<<<<<< Updated upstream
+=======
+========
+
+                //print_string = self.update_model(50);
+                self.update_model(50);
+
+>>>>>>>> e583fbe140ff9b9e7509b3a2dda6ebfbb4eeb60f:src/agent/ddqn.rs
+>>>>>>> Stashed changes
                 if self.env.reward() > current_reward {
                     self.action_record = self.env.action_record.clone();
                     current_reward = self.env.reward();
@@ -87,6 +131,10 @@ impl DQN {
                 .target_model
                 .forward(Tensor::<MyAutodiffBackend, 1>::from(self.env.current_state));
             let max: Result<Vec<i64>, _> = q_val.argmax(0).to_data().to_vec();
+<<<<<<< Updated upstream
+=======
+<<<<<<<< HEAD:src/agent/test_dqn.rs
+>>>>>>> Stashed changes
             // let mut max2 = max.unwrap();
             let mut max2 = Vec::new();
             match  max{
@@ -94,13 +142,31 @@ impl DQN {
                 max2 = val},
                 Err(e) => println!("{:?}", e),
             }
+<<<<<<< Updated upstream
+=======
+========
+            let mut max2 = max.unwrap();
+>>>>>>>> e583fbe140ff9b9e7509b3a2dda6ebfbb4eeb60f:src/agent/ddqn.rs
+>>>>>>> Stashed changes
             max2.pop().unwrap() as i32
         }
     }
 
     pub fn update_target(&mut self) {
         // self.target_model = Model::copy_model(self.target_model.clone(), &self.policy_model);
+<<<<<<< Updated upstream
         self.target_model = Model::copy_model(self.target_model.clone(), &self.policy_model);
+=======
+<<<<<<<< HEAD:src/agent/test_dqn.rs
+        self.target_model = Model::copy_model(self.target_model.clone(), &self.policy_model);
+========
+        self.target_model = Model::soft_copy_model(
+            self.target_model.clone(),
+            &self.policy_model,
+            self.config.tau,
+        );
+>>>>>>>> e583fbe140ff9b9e7509b3a2dda6ebfbb4eeb60f:src/agent/ddqn.rs
+>>>>>>> Stashed changes
     }
     pub fn update_model(&mut self, batch_size: usize) -> String {
         let mut optimizer = AdamConfig::new()
@@ -136,7 +202,15 @@ impl DQN {
             let grads2 = GradientsParams::from_grads(grads, &self.policy_model);
             // Update the model using the optimizer.
             self.policy_model = optimizer.step(self.config.lr, self.policy_model.clone(), grads2);
+<<<<<<< Updated upstream
 
+=======
+<<<<<<<< HEAD:src/agent/test_dqn.rs
+
+========
+            self.update_target();
+>>>>>>>> e583fbe140ff9b9e7509b3a2dda6ebfbb4eeb60f:src/agent/ddqn.rs
+>>>>>>> Stashed changes
             if self.config.epsilon <= 0.5 && self.config.epsilon >= 0.45 {}
             loss_string = loss.to_data().to_string();
         }
@@ -150,6 +224,14 @@ impl DQN {
         while !self.action_record.is_empty() {
             let action = self.action_record.pop().unwrap();
             self.env.step(action);
+<<<<<<< Updated upstream
+=======
+<<<<<<<< HEAD:src/agent/test_dqn.rs
+========
+            println!("{:?}", self.env.current_state);
+
+>>>>>>>> e583fbe140ff9b9e7509b3a2dda6ebfbb4eeb60f:src/agent/ddqn.rs
+>>>>>>> Stashed changes
         }
     }
 
@@ -160,6 +242,14 @@ impl DQN {
         while !self.env.done() {
             let action = self.propose_action();
             self.env.step(action);
+<<<<<<< Updated upstream
+=======
+<<<<<<<< HEAD:src/agent/test_dqn.rs
+========
+            println!("{:?}, {}", self.env.current_state, self.target_model.forward( Tensor::<MyAutodiffBackend,1>::from(self.env.current_state)).to_data());
+
+>>>>>>>> e583fbe140ff9b9e7509b3a2dda6ebfbb4eeb60f:src/agent/ddqn.rs
+>>>>>>> Stashed changes
         }
     }
 }

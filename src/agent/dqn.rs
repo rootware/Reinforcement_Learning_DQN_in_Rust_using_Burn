@@ -121,7 +121,15 @@ impl DQN {
                 Tensor::<MyAutodiffBackend, 1, Int>::from([mem.action]);
             let next_q_values = self.forward(tensor_next_state);
             let target = if done {
+<<<<<<< Updated upstream
                 reward
+=======
+<<<<<<< HEAD
+                continue;
+=======
+                reward
+>>>>>>> e583fbe140ff9b9e7509b3a2dda6ebfbb4eeb60f
+>>>>>>> Stashed changes
             } else {
                 reward + next_q_values.max().mul_scalar(self.config.gamma)
             };

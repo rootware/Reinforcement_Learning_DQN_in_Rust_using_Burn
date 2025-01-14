@@ -4,14 +4,25 @@ use burn::{
     prelude::*,
     tensor::backend::AutodiffBackend,
 };
+use nn::{LeakyRelu, LeakyReluConfig, Relu};
 
 #[derive(Module, Debug)]
 pub struct Model<B: Backend> {
     pub linear1: Linear<B>,
     pub linear2: Linear<B>,
     pub linear3: Linear<B>,
+<<<<<<< Updated upstream
     pub activation2: Sigmoid,
     pub activation1: Sigmoid,
+=======
+<<<<<<< HEAD
+    pub activation2: LeakyRelu,
+    pub activation1: LeakyRelu,
+=======
+    pub activation2: Sigmoid,
+    pub activation1: Sigmoid,
+>>>>>>> e583fbe140ff9b9e7509b3a2dda6ebfbb4eeb60f
+>>>>>>> Stashed changes
 }
 
 #[derive(Config, Debug)]
@@ -27,6 +38,7 @@ impl ModelConfig {
         Model {
             linear1: LinearConfig::new(self.state_size, self.hidden_size)
                 .with_bias(true)
+<<<<<<< Updated upstream
                 .with_initializer(nn::Initializer::XavierUniform { gain: 10.0 })
                 .init(device),
             linear2: LinearConfig::new(self.hidden_size, self.hidden_size)
@@ -39,6 +51,35 @@ impl ModelConfig {
                 .init(device),
             activation2: Sigmoid::new(),
             activation1: Sigmoid::new(),
+=======
+<<<<<<< HEAD
+                .with_initializer(nn::Initializer::XavierNormal { gain: 1.0 })
+                .init(device),
+            linear2: LinearConfig::new(self.hidden_size, self.hidden_size)
+                .with_bias(true)
+                .with_initializer(nn::Initializer::XavierNormal { gain: 1.0 })
+                .init(device),
+            linear3: LinearConfig::new(self.hidden_size, self.num_actions)
+                .with_bias(true)
+                .with_initializer(nn::Initializer::XavierNormal { gain: 1.0 })
+                .init(device),
+            activation2: LeakyReluConfig::new().init(),
+            activation1: LeakyReluConfig::new().init(),
+=======
+                .with_initializer(nn::Initializer::XavierUniform { gain: 10.0 })
+                .init(device),
+            linear2: LinearConfig::new(self.hidden_size, self.hidden_size)
+                .with_bias(true)
+                .with_initializer(nn::Initializer::XavierUniform { gain: 10.0 })
+                .init(device),
+            linear3: LinearConfig::new(self.hidden_size, self.num_actions)
+                .with_bias(true)
+                .with_initializer(nn::Initializer::XavierUniform { gain: 10.0 })
+                .init(device),
+            activation2: Sigmoid::new(),
+            activation1: Sigmoid::new(),
+>>>>>>> e583fbe140ff9b9e7509b3a2dda6ebfbb4eeb60f
+>>>>>>> Stashed changes
         }
     }
 }
