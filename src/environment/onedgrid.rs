@@ -35,7 +35,6 @@ impl Environment {
         if action == 1 {
             self.current_state[0] -= 1.0;
             //self.current_state[0] = (self.current_state[0] as i32 % 11) as f64;
-
         }
 
         self.action_record.push(action);
@@ -52,26 +51,24 @@ impl Environment {
         (state[0] - TARGET[0]).powi(2)
     }
     pub fn reward(&self) -> f64 {
-       // let f = self.distance2(&self.current_state) / self.distance2(&[-3., 5.]);
+        // let f = self.distance2(&self.current_state) / self.distance2(&[-3., 5.]);
         //f64::exp((1. - f) / (0.1 + f))
         if self.done() {
-            1./self.distance2(&self.current_state)
-        }
-        else {
+            1. / self.distance2(&self.current_state)
+        } else {
             0.
         }
     }
 
     pub fn reward_calc(&self, state: &State) -> f64 {
         // let f = self.distance2(&self.current_state) / self.distance2(&[-3., 5.]);
-         //f64::exp((1. - f) / (0.1 + f))
-         if (state[0] - TARGET[0]).abs() <= 0.5 {
-             1./self.distance2(&state)
-         }
-         else {
-             0.
-         }
-     }
+        //f64::exp((1. - f) / (0.1 + f))
+        if (state[0] - TARGET[0]).abs() <= 0.5 {
+            1. / self.distance2(&state)
+        } else {
+            0.
+        }
+    }
 
     pub fn done(&self) -> bool {
         if self.current_steps >= self.maxsteps || self.distance2(&self.current_state) <= 0.4 {
@@ -91,13 +88,12 @@ impl Environment {
     }
 
     pub fn reset(&mut self) {
-
         let mut rng = rand::thread_rng();
-    
+
         let min = -11; // Lower bound
         let max = 11; // Upper bound
 
-        self.current_state = [0.];//[random_number as f64];
+        self.current_state = [0.]; //[random_number as f64];
         self.current_steps = 0;
         self.action_record = Vec::new();
     }

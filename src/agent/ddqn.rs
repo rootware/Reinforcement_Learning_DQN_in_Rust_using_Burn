@@ -1,6 +1,7 @@
 use crate::replay_buffer::ReplayBuffer;
 use crate::utils::*;
-use crate::{environment, model}; use burn::optim::adaptor::OptimizerAdaptor;
+use crate::{environment, model};
+use burn::optim::adaptor::OptimizerAdaptor;
 // For experience replay
 use burn::optim::Optimizer;
 use burn::{
@@ -20,8 +21,8 @@ pub struct DDQN {
     pub config: MyConfig,
     pub action_record: Vec<i32>,
     // pub optimizer: burn::optim::adaptor::OptimizerAdaptor<Adam<_>, _, _> ,
-    pub optimizer: OptimizerAdaptor<burn::optim::Adam<MyBackend>, Model<MyAutodiffBackend>,MyAutodiffBackend>,
-
+    pub optimizer:
+        OptimizerAdaptor<burn::optim::Adam<MyBackend>, Model<MyAutodiffBackend>, MyAutodiffBackend>,
 }
 
 impl DDQN {
@@ -32,8 +33,8 @@ impl DDQN {
         config: MyConfig,
     ) -> Self {
         let optimizer = AdamConfig::new()
-        //.with_epsilon(config.epsilon as f32)
-        .init();
+            //.with_epsilon(config.epsilon as f32)
+            .init();
         DDQN {
             env: Environment::new(),
             policy_model: policy,
@@ -41,8 +42,7 @@ impl DDQN {
             replay_buffer,
             config,
             action_record: Vec::new(),
-            optimizer
-
+            optimizer,
         }
     }
 
@@ -62,10 +62,9 @@ impl DDQN {
                     let result = self.env.step(action);
                     finish = self.env.done();
                     self.replay_buffer.add(result);
-                
 
-                //print_string = self.update_model(50);
-                self.update_model(50);
+                    //print_string = self.update_model(50);
+                    self.update_model(50);
                 }
                 if self.env.reward() > current_reward {
                     self.action_record = self.env.action_record.clone();
@@ -99,19 +98,19 @@ impl DDQN {
         self.target_model = Model::soft_copy_model(
             self.target_model.clone(),
             &self.policy_model,
-            1.-self.config.tau,
+            1. - self.config.tau,
         );
     }
-    pub fn update_model(&mut self, batch_size: usize)  {
-      //  let mut optimizer = AdamConfig::new()
-      //      .with_epsilon(self.config.epsilon as f32)
-       //     .init();
+    pub fn update_model(&mut self, batch_size: usize) {
+        //  let mut optimizer = AdamConfig::new()
+        //      .with_epsilon(self.config.epsilon as f32)
+        //     .init();
         // Sample a batch of experiences from the replay buffer
         let batch = self.replay_buffer.sample(batch_size);
         let mut loss_string = String::new();
         let mut index = 0;
         let B = batch.len();
-        let mut total_loss= Tensor::<MyAutodiffBackend,1>::from([0]);
+        let mut total_loss = Tensor::<MyAutodiffBackend, 1>::from([0]);
         // DQN Q-learning update
         for mem in batch {
             // Compute target Q-value
@@ -126,30 +125,45 @@ impl DDQN {
 
             let policy_action = self.forward(tensor_next_state.clone()).argmax(0);
 
-            let next_q_values = self.target_model.forward(tensor_next_state.clone()).select(0, policy_action);
+            let next_q_values = self
+                .target_model
+                .forward(tensor_next_state.clone())
+                .select(0, policy_action);
             let y_value = if done {
                 reward.clone()
             } else {
                 reward.clone() + next_q_values.clone().mul_scalar(self.config.gamma)
             };
 
-            if index==-1 {
-                println!("State{}\n Next State {}\n action{}\n next q{}\n target{}\n reward{}", tensor_state.to_data(), tensor_next_state.clone().to_data(),action.to_data(), next_q_values.clone().to_data(), y_value.to_data(), reward.to_data());
+            if index == -1 {
+                println!(
+                    "State{}\n Next State {}\n action{}\n next q{}\n target{}\n reward{}",
+                    tensor_state.to_data(),
+                    tensor_next_state.clone().to_data(),
+                    action.to_data(),
+                    next_q_values.clone().to_data(),
+                    y_value.to_data(),
+                    reward.to_data()
+                );
             }
-            index +=1;
+            index += 1;
             // Compute Q-value for the current state and action
             let q_values = self.policy_model.forward(tensor_state.clone());
             let q_value = q_values.select(0, action);
-            let loss = (q_value - y_value).abs().powi(Tensor::<MyAutodiffBackend,1>::from([2])); //.require_grad();
-            total_loss = total_loss.add( loss);
+            let loss = (q_value - y_value)
+                .abs()
+                .powi(Tensor::<MyAutodiffBackend, 1>::from([2])); //.require_grad();
+            total_loss = total_loss.add(loss);
         }
-                                                 // Gradients for the current backward pass
-        total_loss = total_loss.div(Tensor::<MyAutodiffBackend,1>::from([B as f64]));
+        // Gradients for the current backward pass
+        total_loss = total_loss.div(Tensor::<MyAutodiffBackend, 1>::from([B as f64]));
         let grads = total_loss.backward();
         // Gradients linked to each parameter of the model.
         let grads2 = GradientsParams::from_grads(grads, &self.policy_model);
         // Update the model using the optimizer.
-        self.policy_model = self.optimizer.step(self.config.lr, self.policy_model.clone(), grads2);
+        self.policy_model = self
+            .optimizer
+            .step(self.config.lr, self.policy_model.clone(), grads2);
         self.update_target();
     }
 
@@ -161,7 +175,6 @@ impl DDQN {
             let action = self.action_record.pop().unwrap();
             self.env.step(action);
             println!("{:?}", self.env.current_state);
-
         }
     }
 
@@ -172,8 +185,14 @@ impl DDQN {
         while !self.env.done() {
             let action = self.propose_action();
             self.env.step(action);
-            println!("{:?}, {}, {}", self.env.current_state, action, self.target_model.forward( Tensor::<MyAutodiffBackend,1>::from(self.env.current_state)).to_data());
-
+            println!(
+                "{:?}, {}, {}",
+                self.env.current_state,
+                action,
+                self.target_model
+                    .forward(Tensor::<MyAutodiffBackend, 1>::from(self.env.current_state))
+                    .to_data()
+            );
         }
     }
 }

@@ -13,8 +13,6 @@ use burn_tch::LibTorch;
 pub type MyBackend = LibTorch<f32>;
 pub type MyAutodiffBackend = Autodiff<MyBackend>;
 
-
-
 #[derive(Clone, Copy)]
 pub struct MyConfig {
     pub gamma: f64,
