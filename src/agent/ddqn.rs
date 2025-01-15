@@ -1,16 +1,20 @@
+use std::str::FromStr;
+
 use crate::replay_buffer::ReplayBuffer;
 use crate::utils::*;
 use crate::{environment, model};
 use burn::optim::adaptor::OptimizerAdaptor;
 // For experience replay
 use burn::optim::Optimizer;
+use burn::record::{FullPrecisionSettings, NamedMpkFileRecorder};
 use burn::{
     optim::{AdamConfig, GradientsParams},
     tensor::{Int, Tensor},
 };
-use environment::onedgrid::*;
+use environment::one_qubit::*;
 use model::Model;
 use rand::Rng;
+use burn::module::Module;
 
 // Define a simple neural network for Q-function approximation
 pub struct DDQN {
@@ -107,7 +111,6 @@ impl DDQN {
         //     .init();
         // Sample a batch of experiences from the replay buffer
         let batch = self.replay_buffer.sample(batch_size);
-        let mut loss_string = String::new();
         let mut index = 0;
         let B = batch.len();
         let mut total_loss = Tensor::<MyAutodiffBackend, 1>::from([0]);
@@ -182,17 +185,34 @@ impl DDQN {
         self.env.reset();
         self.config.epsilon = 0.0;
 
+        println!("Step No. \t Policy Q Values \t Target Policy \t Action \t Fidelity Post Action");
         while !self.env.done() {
             let action = self.propose_action();
+
+            let target_qval = self
+                .target_model
+                .forward(Tensor::<MyAutodiffBackend, 1>::from(self.env.current_state))
+                .to_data();
+            let policy_qval = self
+                .policy_model
+                .forward(Tensor::<MyAutodiffBackend, 1>::from(self.env.current_state))
+                .to_data();
             self.env.step(action);
+            let fidelity = self.env.fidelity(&self.env.current_state);
             println!(
-                "{:?}, {}, {}",
-                self.env.current_state,
-                action,
-                self.target_model
-                    .forward(Tensor::<MyAutodiffBackend, 1>::from(self.env.current_state))
-                    .to_data()
+                "{}\t  {}\t \t{}\t \t{}\t {}",
+                self.env.current_steps, policy_qval, target_qval, action, fidelity
             );
         }
+    }
+
+    pub fn save_nets(&self, path : String) {
+        let recorder = NamedMpkFileRecorder::<FullPrecisionSettings>::new();
+        self.target_model.clone()
+            .save_file(path.clone() +"target", &recorder)
+            .expect("Should be able to save the model");
+        self.policy_model.clone()
+            .save_file(path + "policy", &recorder)
+            .expect("Should be able to save the model");
     }
 }
