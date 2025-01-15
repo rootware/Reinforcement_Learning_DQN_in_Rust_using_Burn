@@ -88,7 +88,7 @@ impl DQN {
         let mut rng = rand::thread_rng();
         let random_float: f64 = rng.gen_range(0.0..1.0);
 
-        if random_float > self.config.epsilon {
+        if random_float < self.config.epsilon {
             return rng.gen_range(0..NUM_ACTIONS) as i32;
         } else {
             let q_val = self
